@@ -1,0 +1,4679 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Калькулятор CSS: углы, translate, transition, анимация и 3D</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #ece9f5;
+        --accent: #a78bfa;
+        --line: #322b45;
+        --muted: #9b94ad;
+        --bg: #14111c;
+        --card: #1c1830;
+        --sunken: #221c33;
+        --input: #241f36;
+        --track: #2a2340;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-block-size: 100dvh;
+        padding: 20px 16px 40px;
+        display: block;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+
+      .topbar {
+        display: grid;
+        gap: 10px;
+        inline-size: min(680px, 100%);
+        margin-inline: auto;
+        padding-block: 12px;
+        background: var(--bg);
+      }
+
+      .topbar__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .reset-tab {
+        padding: 6px 11px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--muted);
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .reset-tab:hover {
+        color: var(--ink);
+        border-color: var(--accent);
+      }
+
+      .reset-tab:active {
+        transform: translateY(1px);
+      }
+
+      .brand {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: var(--muted);
+      }
+
+      .brand b {
+        color: var(--ink);
+      }
+
+      .tabs {
+        display: grid;
+        gap: 10px;
+      }
+
+      .tab-group {
+        display: grid;
+        gap: 4px;
+      }
+
+      .tab-group__label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .tab-row {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-block-end: 2px;
+        scrollbar-width: none;
+      }
+
+      .tab-row::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tabs::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--card);
+        color: var(--muted);
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .tab:hover {
+        color: var(--ink);
+        border-color: var(--accent);
+      }
+
+      .tab[aria-selected="true"] {
+        border-color: transparent;
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+        color: #fff;
+      }
+
+      main {
+        inline-size: min(680px, 100%);
+        margin-inline: auto;
+        padding-block-end: 24px;
+      }
+
+      .card {
+        display: none;
+        padding: 24px;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+      }
+
+      .card.is-active {
+        display: block;
+      }
+
+      .bf-stage {
+        position: relative;
+        block-size: 190px;
+        margin-block-end: 18px;
+        border-radius: 14px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 18% 20%, #f472b6, transparent 46%),
+          radial-gradient(circle at 82% 26%, #fbbf24, transparent 46%),
+          radial-gradient(circle at 40% 88%, #34d399, transparent 44%),
+          linear-gradient(135deg, #1b1035, #2a2340);
+      }
+
+      .bf-glass {
+        position: absolute;
+        inset: 28px;
+        display: grid;
+        place-items: center;
+        border: 1px solid rgb(255 255 255 / 0.22);
+        border-radius: 14px;
+        background: rgb(255 255 255 / 0.1);
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .clip-demo {
+        inline-size: 200px;
+        block-size: 140px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #7c3aed, #f472b6 60%, #fbbf24);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 12px;
+      }
+
+
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .hint {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        place-items: center;
+        block-size: 200px;
+        background: var(--sunken);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      .axis {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to right, transparent calc(50% - 0.5px), #3a3355 50%, transparent calc(50% + 0.5px)),
+          linear-gradient(to bottom, transparent calc(50% - 0.5px), #3a3355 50%, transparent calc(50% + 0.5px));
+      }
+
+      .box {
+        --deg: 0deg;
+        position: relative;
+        inline-size: 110px;
+        block-size: 110px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+        transform: rotate(var(--deg));
+        transition: transform 60ms linear;
+      }
+
+      .box::after {
+        content: "";
+        position: absolute;
+        inset-block-start: 10px;
+        inset-inline-start: 50%;
+        translate: -50% 0;
+        inline-size: 10px;
+        block-size: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .row {
+        display: grid;
+        align-items: start;
+        gap: 12px;
+        margin-block-start: 16px;
+      }
+
+      .row--two {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .row--three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .row--actions {
+        grid-template-columns: auto;
+        justify-content: start;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        min-inline-size: 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .cap {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      input[type="number"],
+      select {
+        inline-size: 100%;
+        min-inline-size: 0;
+        block-size: 40px;
+        padding: 0 10px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        font: inherit;
+        color: var(--ink);
+        background: var(--input);
+      }
+
+      @media (max-width: 430px) {
+        .row--two,
+        .row--three {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      input[type="number"]:focus-visible,
+      select:focus-visible,
+      input[type="range"]:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      input[type="range"] {
+        inline-size: 100%;
+        margin-block-start: 16px;
+        accent-color: var(--accent);
+      }
+
+      .units {
+        inline-size: 100%;
+        margin-block-start: 16px;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .units th,
+      .units td {
+        padding: 7px 0;
+        border-block-start: 1px solid var(--line);
+        text-align: start;
+        font-size: 14px;
+      }
+
+      .units th {
+        font-weight: 600;
+        color: var(--muted);
+        font-size: 12px;
+        inline-size: 80px;
+      }
+
+      .track {
+        position: relative;
+        block-size: 6px;
+        margin-block-start: 16px;
+        border-radius: 999px;
+        background: var(--track);
+        overflow: hidden;
+      }
+
+      .fill {
+        block-size: 100%;
+        inline-size: 0%;
+        background: var(--accent);
+      }
+
+      .time {
+        display: flex;
+        justify-content: space-between;
+        margin-block-start: 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      button {
+        block-size: 40px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 9px;
+        background: var(--accent);
+        color: #1b1035;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #c4b5fd;
+      }
+
+      .out--short {
+        margin-block-start: 10px;
+        background: #2a1f45;
+        border-color: #4c3575;
+        color: #e9d5ff;
+      }
+
+      .scene3d {
+        inline-size: 100%;
+        block-size: 100%;
+        display: grid;
+        place-items: center;
+      }
+
+      .card3d {
+        inline-size: 140px;
+        block-size: 140px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #7c3aed, #4c1d95);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        font-size: 22px;
+        letter-spacing: 0.06em;
+        will-change: transform;
+      }
+
+      .out {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin: 16px 0 0;
+        padding: 12px 14px;
+        background: var(--sunken);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .out-wrap {
+        position: relative;
+        margin-block-start: 16px;
+      }
+
+      .out-wrap .out {
+        margin: 0;
+      }
+
+      .copy {
+        position: absolute;
+        inset-block-start: 8px;
+        inset-inline-end: 8px;
+        block-size: 28px;
+        padding: 0 10px;
+        font: 12px system-ui, sans-serif;
+        background: var(--input);
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        cursor: pointer;
+      }
+
+      .copy:hover {
+        color: var(--ink);
+        background: var(--track);
+      }
+
+      .copy.is-done {
+        color: #4ade80;
+        border-color: #4ade80;
+      }
+
+      .curve-wrap {
+        display: grid;
+        grid-template-columns: 200px minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+        margin-block-start: 12px;
+      }
+
+      @media (max-width: 520px) {
+        .curve-wrap {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .curve {
+        inline-size: 200px;
+        block-size: 200px;
+        background: var(--sunken);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        touch-action: none;
+      }
+
+      .curve .grid-line {
+        stroke: var(--track);
+        stroke-width: 1;
+      }
+
+      .curve .guide {
+        stroke: var(--muted);
+        stroke-width: 1;
+        stroke-dasharray: 4 4;
+        opacity: 0.6;
+      }
+
+      .curve .curve-line {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+
+      .curve .handle {
+        fill: var(--accent);
+        stroke: var(--card);
+        stroke-width: 2;
+        cursor: grab;
+      }
+
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-block-start: 10px;
+      }
+
+      .presets button {
+        block-size: 30px;
+        padding: 0 10px;
+        font-size: 12px;
+        background: var(--input);
+        color: var(--ink);
+        border: 1px solid var(--line);
+      }
+
+      .presets button:hover {
+        background: var(--track);
+      }
+
+      .kf {
+        display: grid;
+        gap: 8px;
+        margin-block-start: 12px;
+      }
+
+      .kf-row {
+        display: grid;
+        grid-template-columns: 46px repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        align-items: center;
+      }
+
+      .kf-row span {
+        font-size: 12px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .kf-row input {
+        block-size: 34px;
+      }
+
+      .kf-head span {
+        font-size: 11px;
+        text-transform: lowercase;
+      }
+      .stops {
+        display: grid;
+        gap: 8px;
+        margin-block-start: 12px;
+      }
+
+      .stop-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        block-size: 34px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--input);
+        font-size: 12px;
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .switch input {
+        inline-size: 16px;
+        block-size: 16px;
+        accent-color: var(--accent);
+      }
+
+      .switch:has(input:checked) {
+        color: var(--ink);
+        border-color: var(--accent);
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+      }
+
+      .field__label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .field__value {
+        display: flex;
+        align-items: center;
+        block-size: 40px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--input);
+        font: 600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--ink);
+      }
+
+      .grad-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-block-start: 12px;
+      }
+
+      .grad-actions button {
+        block-size: 34px;
+        padding: 0 12px;
+        font-size: 13px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        background: var(--input);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .grad-actions button:hover {
+        background: var(--track);
+      }
+
+      .grad-actions button.ghost {
+        background: transparent;
+        color: var(--muted);
+      }
+
+      .stop-row input[type="color"] {
+        flex: 0 0 42px;
+        inline-size: 42px;
+        block-size: 34px;
+        padding: 2px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--input);
+      }
+
+      .stop-row input[type="number"] {
+        flex: 0 0 96px;
+        inline-size: 96px;
+        block-size: 34px;
+      }
+
+      .stop-del {
+        flex: 0 0 30px;
+        inline-size: 30px;
+        block-size: 34px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--input);
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .stop-del:hover {
+        color: var(--ink);
+        background: var(--track);
+      }
+
+      .ca-demo {
+        display: grid;
+        place-items: center;
+        inline-size: 240px;
+        block-size: 110px;
+        border-radius: 14px;
+        background-color: #7c3aed;
+        color: #fff;
+        font-weight: 700;
+        font-size: 18px;
+      }
+
+      .ca-demo--text {
+        background-color: transparent;
+        background-image: none;
+        color: #7c3aed;
+        font-size: 26px;
+      }
+
+      .ts-stage {
+        display: grid;
+        place-items: center;
+        block-size: 200px;
+        margin-block-end: 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #f7f5ff;
+        overflow: hidden;
+      }
+
+      .ts-text {
+        font-weight: 800;
+        line-height: 1;
+        -webkit-text-stroke: 2px #7c3aed;
+        color: #1b1035;
+      }
+
+            .bb-stage {
+        block-size: 220px;
+        margin-block-end: 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background-color: #1b1035;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .mb-stage {
+        position: relative;
+        block-size: 240px;
+        margin-block-end: 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #1b1035;
+        touch-action: none;
+      }
+
+      .mb-base {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(135deg, #4c1d95, #1b1035 70%);
+      }
+
+      .mb-shape {
+        position: absolute;
+        inline-size: 128px;
+        block-size: 128px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        cursor: grab;
+      }
+
+      .mb-text {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        line-height: 1;
+        white-space: nowrap;
+        cursor: grab;
+        user-select: none;
+      }
+
+      .mb-shape:active,
+      .mb-text:active {
+        cursor: grabbing;
+      }
+
+      .mb-layers {
+        display: grid;
+        gap: 8px;
+        margin-block-start: 12px;
+      }
+
+      .mb-row {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) 36px 30px;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mb-row input[type="color"] {
+        inline-size: 42px;
+        block-size: 34px;
+        padding: 2px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--input);
+      }
+
+      .mb-row select,
+      .mb-row .mb-kind,
+      .mb-row .stop-del,
+      .mb-row .mb-size-input {
+        block-size: 34px;
+      }
+
+      .mb-row .mb-kind {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--input);
+        color: var(--ink);
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      .mb-extra {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 64px;
+        gap: 8px;
+      }
+
+      .mb-extra .mb-text-input,
+      .mb-extra .mb-size-input {
+        block-size: 34px;
+        min-inline-size: 0;
+      }
+
+      .mb-row .stop-del {
+        inline-size: 30px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--input);
+        color: var(--muted);
+        cursor: pointer;
+      }
+
+      .mb-row .stop-del:hover {
+        color: var(--ink);
+        background: var(--track);
+      }
+
+      .grad-stage {
+
+        position: relative;
+        block-size: 180px;
+        margin-block-end: 18px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--sunken);
+        cursor: crosshair;
+        touch-action: none;
+      }
+
+      .grad-stage--radial {
+        border-radius: 14px;
+      }
+
+      .grad-stage--conic {
+        border-radius: 50%;
+        inline-size: 200px;
+        block-size: 200px;
+        margin: 4px auto 18px;
+      }
+
+      .grad-dot {
+        position: absolute;
+        inline-size: 14px;
+        block-size: 14px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgb(167 139 250 / 0.35);
+        translate: -50% -50%;
+        left: 50%;
+        top: 50%;
+        pointer-events: none;
+      }
+
+      .mono {
+        font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--ink);
+      }
+
+      .grad-stage .grad-stage__label {
+        display: none;
+      }
+
+      .plate-factor {
+        align-self: end;
+        font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--muted);
+      }
+
+            .slider-num {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 64px;
+        align-items: center;
+        gap: 4px 8px;
+      }
+
+      .slider-num > input[type="range"] {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .slider-num > input[type="number"] {
+        grid-column: 2;
+        grid-row: 1;
+        min-inline-size: 0;
+      }
+
+            .flip3d {
+        position: relative;
+        inline-size: 160px;
+        block-size: 160px;
+        transform-style: flat;
+      }
+
+      .face {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 22px;
+        backface-visibility: visible;
+      }
+
+      .face--front {
+        background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      }
+
+      .plate {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        border: 1px dashed rgb(255 255 255 / 0.5);
+        border-radius: 14px;
+        background: rgb(124 58 237 / 0.35);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        transform: translateZ(140px);
+        pointer-events: none;
+      }
+
+            .face--back {
+        background: linear-gradient(135deg, #0f766e, #22d3ee);
+        transform: rotateY(180deg);
+      }
+
+            .origin-pad {
+        position: relative;
+        inline-size: 132px;
+        block-size: 132px;
+        margin: 4px auto 18px;
+        border: 1px dashed var(--line);
+        border-radius: 12px;
+        background:
+          linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 100% 33.33%,
+          linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 33.33% 100%,
+          var(--sunken);
+        cursor: crosshair;
+        touch-action: none;
+      }
+
+      .origin-dot {
+        position: absolute;
+        inline-size: 14px;
+        block-size: 14px;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgb(167 139 250 / 0.25);
+        translate: -50% -50%;
+        left: 50%;
+        top: 50%;
+      }
+
+      .origin-pad__label {
+        position: absolute;
+        inset-block-end: -20px;
+        inset-inline: 0;
+        text-align: center;
+        font-size: 10px;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .filter-demo {
+        inline-size: 200px;
+        block-size: 110px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #7c3aed, #f472b6 60%, #fbbf24);
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+      }
+
+      .color-stage {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+        margin-block-end: 16px;
+      }
+
+      .color-swatch {
+        inline-size: 100%;
+        block-size: 90px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .color-value {
+        margin: 0;
+        font: 600 15px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--ink);
+      }
+
+      .color-formats {
+        margin: 12px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .sliders {
+        display: grid;
+        gap: 10px;
+      }
+
+      .sliders label {
+        display: grid;
+        grid-template-columns: 22px minmax(0, 1fr) 46px;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .sliders output {
+        font: 600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        color: var(--ink);
+        text-align: end;
+      }
+
+      input[type="range"] {
+        inline-size: 100%;
+        accent-color: var(--accent);
+      }
+
+      .palette {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 8px;
+        margin-block-start: 14px;
+      }
+
+      .swatch-btn {
+        aspect-ratio: 1;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .swatch-btn:hover {
+        border-color: var(--accent);
+        transform: scale(1.04);
+      }
+      .row--four {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .layers {
+        display: grid;
+        gap: 12px;
+        margin-block-start: 16px;
+      }
+
+      .layer {
+        padding: 12px;
+        background: var(--sunken);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .layer__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-block-end: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .layer__head b {
+        color: var(--accent);
+        font-size: 12px;
+      }
+
+      .layer__del {
+        block-size: 26px;
+        padding: 0 8px;
+        font-size: 12px;
+        background: var(--input);
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+      }
+
+      .layer__del:hover {
+        color: var(--ink);
+        background: var(--track);
+      }
+
+      .layer .row {
+        margin-block-start: 8px;
+      }
+
+      .layer .row:first-of-type {
+        margin-block-start: 0;
+      }
+
+      .layer label {
+        font-size: 11px;
+      }
+
+      .stage--text {
+        block-size: 150px;
+      }
+
+      .text-demo {
+        position: relative;
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: #7c3aed;
+        text-align: center;
+      }
+
+      label.check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        block-size: 40px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      label.check input {
+        inline-size: 18px;
+        block-size: 18px;
+        accent-color: var(--accent);
+      }
+
+      .presets button[data-bs] {
+        block-size: 34px;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 0 12px 32px;
+        }
+
+        .topbar {
+          inline-size: auto;
+          margin-inline: -12px;
+          padding: 10px 12px 8px;
+          border-block-end: 1px solid var(--line);
+        }
+
+        .brand {
+          font-size: 12px;
+        }
+
+        main {
+          inline-size: 100%;
+          padding: 12px 0 0;
+        }
+
+        .card {
+          padding: 14px;
+          border: none;
+          border-radius: 0;
+          background: transparent;
+        }
+
+        h1 {
+          font-size: 16px;
+        }
+
+        .row,
+        .row--two,
+        .row--three,
+        .row--four {
+          grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+        }
+
+        .stage {
+          block-size: 140px;
+        }
+
+        .bf-stage {
+          block-size: 150px;
+        }
+
+        .clip-demo {
+          inline-size: 160px;
+          block-size: 110px;
+        }
+
+        .out {
+          font-size: 12px;
+        }
+
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__row">
+        <p class="brand">CSS-калькулятор · <b>23 панели</b></p>
+        <button class="reset-tab" id="reset-tab" type="button" title="Вернуть значения панели к исходным">очистить значение</button>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Панели калькулятора"></nav>
+    </header>
+    <main>
+      <!-- УГЛЫ -->
+      <section class="card">
+        <h1>Углы в CSS</h1>
+        <p class="hint">Введите значение и выберите единицу — элемент повернётся, остальные единицы пересчитаются.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="box"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Значение
+            <input id="value" type="number" value="45" step="any" />
+          </label>
+          <label>
+            Единица
+            <select id="unit">
+              <option value="deg" selected>deg</option>
+              <option value="turn">turn</option>
+              <option value="rad">rad</option>
+              <option value="grad">grad</option>
+            </select>
+          </label>
+        </div>
+
+        <input id="slider" type="range" min="0" max="360" step="1" value="45" aria-label="Угол в градусах" />
+
+        <table class="units">
+          <tbody>
+            <tr>
+              <th scope="row">deg</th>
+              <td id="out-deg">45°</td>
+            </tr>
+            <tr>
+              <th scope="row">turn</th>
+              <td id="out-turn">0,125</td>
+            </tr>
+            <tr>
+              <th scope="row">rad</th>
+              <td id="out-rad">0,7854</td>
+            </tr>
+            <tr>
+              <th scope="row">grad</th>
+              <td id="out-grad">50</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- RGB -->
+      <section class="card">
+        <h1>RGB</h1>
+        <p class="hint">Красный, зелёный, синий — по каналам 0–255, плюс прозрачность. Ниже сразу видно то же значение в hex и hsl.</p>
+
+        <div class="color-stage">
+          <div class="color-swatch" id="rgb-swatch"></div>
+          <p class="color-value" id="rgb-value">rgb(124 58 237)</p>
+        </div>
+
+        <div class="sliders">
+          <label>R <input id="rgb-r" type="range" min="0" max="255" value="124" /><output id="rgb-r-out">124</output></label>
+          <label>G <input id="rgb-g" type="range" min="0" max="255" value="58" /><output id="rgb-g-out">58</output></label>
+          <label>B <input id="rgb-b" type="range" min="0" max="255" value="237" /><output id="rgb-b-out">237</output></label>
+          <label>A <input id="rgb-a" type="range" min="0" max="100" value="100" /><output id="rgb-a-out">100</output></label>
+        </div>
+
+        <p class="color-formats" id="rgb-formats"></p>
+        <pre class="out" id="rgb-code"></pre>
+      </section>
+
+      <!-- HEX -->
+      <section class="card">
+        <h1>HEX</h1>
+        <p class="hint">Шестнадцатеричная запись: <code>#7c3aed</code>. Можно ввести вручную или взять из палитры ниже.</p>
+
+        <div class="color-stage">
+          <div class="color-swatch" id="hex-swatch"></div>
+          <p class="color-value" id="hex-value">#7c3aed</p>
+        </div>
+
+        <div class="row row--two">
+          <label>Значение <input id="hex-input" type="text" value="#7c3aed" spellcheck="false" /></label>
+          <label>Прозрачность, % <input id="hex-alpha" type="range" min="0" max="100" value="100" /></label>
+        </div>
+
+        <div class="palette" id="hex-palette"></div>
+
+        <p class="color-formats" id="hex-formats"></p>
+        <pre class="out" id="hex-code"></pre>
+      </section>
+
+      <!-- HSL -->
+      <section class="card">
+        <h1>HSL</h1>
+        <p class="hint">Оттенок, насыщенность и светлость: так удобно получать оттенки одного цвета.</p>
+
+        <div class="color-stage">
+          <div class="color-swatch" id="hsl-swatch"></div>
+          <p class="color-value" id="hsl-value">hsl(262 83% 58%)</p>
+        </div>
+
+        <div class="sliders">
+          <label>H <input id="hsl-h" type="range" min="0" max="360" value="262" /><output id="hsl-h-out">262</output></label>
+          <label>S <input id="hsl-s" type="range" min="0" max="100" value="83" /><output id="hsl-s-out">83</output></label>
+          <label>L <input id="hsl-l" type="range" min="0" max="100" value="58" /><output id="hsl-l-out">58</output></label>
+        </div>
+
+        <p class="color-formats" id="hsl-formats"></p>
+        <pre class="out" id="hsl-code"></pre>
+      </section>
+
+      <!-- TRANSLATE -->
+      <section class="card">
+        <h1>translate</h1>
+        <p class="hint">Сдвиг по X и Y — отдельным свойством, без <code>transform</code>. Двигайте ползунки или вводите числа.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="tr-box"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Сдвиг по X, px
+            <input id="tr-x" type="number" value="60" step="5" />
+          </label>
+          <label>
+            Сдвиг по Y, px
+            <input id="tr-y" type="number" value="-20" step="5" />
+          </label>
+        </div>
+
+        <input id="tr-slider-x" type="range" min="-150" max="150" step="1" value="60" aria-label="Сдвиг по X" />
+        <input id="tr-slider-y" type="range" min="-90" max="90" step="1" value="-20" aria-label="Сдвиг по Y" />
+
+        <pre class="out" id="tr-code"></pre>
+        <pre class="out out--short" id="tr-short"></pre>
+      </section>
+
+      <!-- TRANSFORM -->
+      <section class="card">
+        <h1>transform</h1>
+        <p class="hint">Поворот, масштаб, наклон и точка отсчёта. Точку origin можно тянуть мышкой прямо по сетке — числа обновятся сами.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="tf-box"></div>
+        </div>
+
+        <div class="row row--three">
+          <label>
+            rotate, deg
+            <input id="tf-rot" type="number" value="20" step="5" />
+          </label>
+          <label>
+            scale
+            <input id="tf-scale" type="number" value="1.15" step="0.05" />
+          </label>
+          <label>
+            skew, deg
+            <input id="tf-skew" type="number" value="0" step="5" />
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            origin X, %
+            <input id="tf-ox" type="number" value="50" step="5" />
+          </label>
+          <label>
+            origin Y, %
+            <input id="tf-oy" type="number" value="50" step="5" />
+          </label>
+        </div>
+
+        <div class="row row--four">
+          <label>rotate3d X <input id="tf-x3" type="number" value="0" step="1" /></label>
+          <label>Y <input id="tf-y3" type="number" value="1" step="1" /></label>
+          <label>Z <input id="tf-z3" type="number" value="0" step="1" /></label>
+          <label>угол <input id="tf-a3" type="number" value="0" step="5" /></label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            transform-box
+            <select id="tf-box">
+              <option value="view-box" selected>view-box</option>
+              <option value="border-box">border-box</option>
+              <option value="content-box">content-box</option>
+              <option value="fill-box">fill-box</option>
+              <option value="stroke-box">stroke-box</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="origin-pad" id="tf-pad" title="Потяните точку — это и есть transform-origin">
+          <span class="origin-dot" id="tf-dot"></span>
+          <span class="origin-pad__label">origin</span>
+        </div>
+
+        <pre class="out" id="tf-code"></pre>
+      </section>
+
+      <!-- TRANSITION -->
+      <section class="card">
+        <h1>transition</h1>
+        <p class="hint">Плавный переход между двумя состояниями. Наведите на сцену или нажмите кнопку — элемент поедет с заданной скоростью.</p>
+
+        <div class="stage" id="t-stage">
+          <div class="axis"></div>
+          <div class="box" id="t-box"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Свойство
+            <select id="t-prop">
+              <option value="translate" selected>translate</option>
+              <option value="rotate">rotate</option>
+              <option value="scale">scale</option>
+              <option value="opacity">opacity</option>
+            </select>
+          </label>
+          <label>
+            <span class="cap">До значения</span>
+            <input id="t-to" type="number" value="60" step="any" />
+          </label>
+        </div>
+
+        <div class="row row--three">
+          <label>
+            Длительность, с
+            <input id="t-dur" type="number" value="0.4" min="0.1" step="0.1" />
+          </label>
+          <label>
+            Задержка, с
+            <input id="t-delay" type="number" value="0" min="0" step="0.1" />
+          </label>
+          <label>
+            Функция
+            <select id="t-ease">
+              <option value="linear">linear</option>
+              <option value="ease" selected>ease</option>
+              <option value="ease-in">ease-in</option>
+              <option value="ease-out">ease-out</option>
+              <option value="ease-in-out">ease-in-out</option>
+              <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">cubic-bezier</option>
+              <option value="steps(4, end)">steps(4, end)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--actions">
+          <button id="t-toggle" type="button">Переключить состояние</button>
+        </div>
+
+        <pre class="out" id="t-code"></pre>
+        <pre class="out out--short" id="t-short"></pre>
+      </section>
+
+      <!-- КРИВАЯ -->
+      <section class="card">
+        <h1>Кривая (cubic-bezier)</h1>
+        <p class="hint">Тяните две точки графика — ниже готовое значение для CSS. Кнопки задают известные кривые.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="cv-box"></div>
+        </div>
+
+        <div class="curve-wrap">
+          <svg class="curve" id="curve" viewBox="0 0 220 220" aria-label="График функции времени">
+            <line class="grid-line" x1="0" y1="110" x2="220" y2="110" />
+            <line class="grid-line" x1="110" y1="0" x2="110" y2="220" />
+            <line class="guide" id="cv-g1" x1="20" y1="200" x2="20" y2="200" />
+            <line class="guide" id="cv-g2" x1="200" y1="20" x2="200" y2="20" />
+            <path class="curve-line" id="cv-path" d="" />
+            <circle class="handle" id="cv-h1" r="7" cx="65" cy="182" />
+            <circle class="handle" id="cv-h2" r="7" cx="65" cy="20" />
+          </svg>
+
+          <div>
+            <pre class="out" id="cv-code"></pre>
+            <div class="presets" id="cv-presets">
+              <button type="button" data-b="0.25, 0.1, 0.25, 1">ease</button>
+              <button type="button" data-b="0, 0, 1, 1">linear</button>
+              <button type="button" data-b="0.42, 0, 1, 1">ease-in</button>
+              <button type="button" data-b="0, 0, 0.58, 1">ease-out</button>
+              <button type="button" data-b="0.42, 0, 0.58, 1">ease-in-out</button>
+              <button type="button" data-b="0.34, 1.56, 0.64, 1">bounce</button>
+            </div>
+            <div class="row row--actions">
+              <button id="cv-play" type="button">▶ Проверить</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- АНИМАЦИЯ -->
+      <section class="card">
+        <h1>Анимация</h1>
+        <p class="hint">Меняйте параметры — анимация запустится сразу. Ниже — эквивалентный CSS.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="anim-box"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Эффект
+            <select id="effect">
+              <option value="rotate" selected>поворот</option>
+              <option value="translate">сдвиг</option>
+              <option value="scale">масштаб</option>
+              <option value="opacity">прозрачность</option>
+            </select>
+          </label>
+          <label>
+            <span class="cap">До значения <span id="value-unit">deg</span></span>
+            <input id="to" type="number" value="90" step="any" />
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Длительность, с
+            <input id="duration" type="number" value="1" min="0.1" step="0.1" />
+          </label>
+          <label>
+            Задержка, с
+            <input id="delay" type="number" value="0" min="0" step="0.1" />
+          </label>
+        </div>
+
+        <div class="row row--three">
+          <label>
+            Функция
+            <select id="easing">
+              <option value="linear">linear</option>
+              <option value="ease" selected>ease</option>
+              <option value="ease-in">ease-in</option>
+              <option value="ease-out">ease-out</option>
+              <option value="ease-in-out">ease-in-out</option>
+              <option value="cubic-bezier(0.34, 1.56, 0.64, 1)">cubic-bezier</option>
+              <option value="steps(4, end)">steps(4, end)</option>
+            </select>
+          </label>
+          <label>
+            Повторов
+            <select id="iterations">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="infinite">∞</option>
+            </select>
+          </label>
+          <label>
+            Направление
+            <select id="direction">
+              <option value="normal" selected>normal</option>
+              <option value="reverse">reverse</option>
+              <option value="alternate">alternate</option>
+              <option value="alternate-reverse">alternate-reverse</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--actions">
+          <button id="play" type="button">▶ Запустить</button>
+        </div>
+
+        <div class="track"><div class="fill" id="fill"></div></div>
+        <div class="time">
+          <span id="elapsed">0 с</span>
+          <span id="total">1 с</span>
+        </div>
+
+        <pre class="out" id="code"></pre>
+        <pre class="out out--short" id="short"></pre>
+      </section>
+
+      <!-- @KEYFRAMES РЕДАКТОР -->
+      <section class="card">
+        <h1>@keyframes: многошаговый</h1>
+        <p class="hint">Пять кадров — правьте числа и запускайте. Ниже готовый сценарий для CSS.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="kf-box"></div>
+        </div>
+
+        <div class="kf">
+          <div class="kf-row kf-head">
+            <span>кадр</span>
+            <span>X, px</span>
+            <span>rotate</span>
+            <span>scale</span>
+            <span>opacity</span>
+          </div>
+          <div class="kf-row">
+            <span>0%</span>
+            <input id="kf-x-0" type="number" value="0" step="5" />
+            <input id="kf-r-0" type="number" value="0" step="5" />
+            <input id="kf-s-0" type="number" value="0.9" step="0.05" />
+            <input id="kf-o-0" type="number" value="0" step="0.05" />
+          </div>
+          <div class="kf-row">
+            <span>25%</span>
+            <input id="kf-x-25" type="number" value="40" step="5" />
+            <input id="kf-r-25" type="number" value="90" step="5" />
+            <input id="kf-s-25" type="number" value="1.2" step="0.05" />
+            <input id="kf-o-25" type="number" value="1" step="0.05" />
+          </div>
+          <div class="kf-row">
+            <span>50%</span>
+            <input id="kf-x-50" type="number" value="80" step="5" />
+            <input id="kf-r-50" type="number" value="180" step="5" />
+            <input id="kf-s-50" type="number" value="1" step="0.05" />
+            <input id="kf-o-50" type="number" value="1" step="0.05" />
+          </div>
+          <div class="kf-row">
+            <span>75%</span>
+            <input id="kf-x-75" type="number" value="40" step="5" />
+            <input id="kf-r-75" type="number" value="270" step="5" />
+            <input id="kf-s-75" type="number" value="0.85" step="0.05" />
+            <input id="kf-o-75" type="number" value="0.7" step="0.05" />
+          </div>
+          <div class="kf-row">
+            <span>100%</span>
+            <input id="kf-x-100" type="number" value="0" step="5" />
+            <input id="kf-r-100" type="number" value="360" step="5" />
+            <input id="kf-s-100" type="number" value="1" step="0.05" />
+            <input id="kf-o-100" type="number" value="1" step="0.05" />
+          </div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Длительность, с
+            <input id="kf-dur" type="number" value="2" min="0.2" step="0.1" />
+          </label>
+          <label>
+            Повторов
+            <select id="kf-iters">
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="infinite" selected>∞</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--actions">
+          <button id="kf-play" type="button">▶ Запустить</button>
+        </div>
+
+        <pre class="out" id="kf-code"></pre>
+      </section>
+
+      <!-- BOX-SHADOW -->
+      <section class="card">
+        <h1>box-shadow: слои</h1>
+        <p class="hint">Слои накладываются друг на друга: ближняя резкая + дальняя мягкая. Добавляйте слои кнопкой, пресеты дают готовые наборы.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="box" id="bs-box"></div>
+        </div>
+
+        <div class="layers" id="bs-layers"></div>
+
+        <div class="row row--actions">
+          <button id="bs-add" type="button">+ слой</button>
+          <button id="bs-reset" type="button">сброс</button>
+        </div>
+
+        <div class="presets" id="bs-presets">
+          <button type="button" data-bs="card">карточка</button>
+          <button type="button" data-bs="soft">мягкая</button>
+          <button type="button" data-bs="ring">обводка</button>
+          <button type="button" data-bs="neon">неон</button>
+          <button type="button" data-bs="3d">3D</button>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Формат цвета
+            <select id="bs-format">
+              <option value="rgb">rgb()</option>
+              <option value="hex">hex</option>
+              <option value="hsl">hsl()</option>
+            </select>
+          </label>
+        </div>
+
+        <pre class="out" id="bs-code"></pre>
+      </section>
+
+      <!-- TEXT-SHADOW -->
+      <section class="card">
+        <h1>text-shadow: слои</h1>
+        <p class="hint">Тени текста тоже складываются: неон, 3D и обводка — это несколько слоёв в одном значении.</p>
+
+        <div class="stage stage--text">
+          <div class="axis"></div>
+          <div class="text-demo" id="ts-demo">Тень текста</div>
+        </div>
+
+        <div class="layers" id="ts-layers"></div>
+
+        <div class="row row--actions">
+          <button id="ts-add" type="button">+ слой</button>
+          <button id="ts-reset" type="button">сброс</button>
+        </div>
+
+        <div class="presets" id="ts-presets">
+          <button type="button" data-ts="soft">мягкая</button>
+          <button type="button" data-ts="neon">неон</button>
+          <button type="button" data-ts="3d">3D</button>
+          <button type="button" data-ts="outline">обводка</button>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Формат цвета
+            <select id="ts-format">
+              <option value="rgb">rgb()</option>
+              <option value="hex">hex</option>
+              <option value="hsl">hsl()</option>
+            </select>
+          </label>
+        </div>
+
+        <pre class="out" id="ts-code"></pre>
+      </section>
+
+      <!-- FILTER -->
+      <section class="card">
+        <h1>filter</h1>
+        <p class="hint">Функции идут слева направо. В CSS попадают только те, что реально меняют вид — нейтральные значения отбрасываются.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="filter-demo" id="fl-box">filter</div>
+        </div>
+
+        <div class="row row--three">
+          <label>blur, px <input id="fl-blur" type="number" value="0" min="0" max="20" step="0.5" /></label>
+          <label>brightness <input id="fl-bright" type="number" value="1" min="0" max="3" step="0.05" /></label>
+          <label>contrast <input id="fl-contrast" type="number" value="1" min="0" max="2" step="0.05" /></label>
+        </div>
+
+        <div class="row row--three">
+          <label>saturate <input id="fl-sat" type="number" value="1" min="0" max="3" step="0.05" /></label>
+          <label>grayscale <input id="fl-gray" type="number" value="0" min="0" max="1" step="0.05" /></label>
+          <label>sepia <input id="fl-sepia" type="number" value="0" min="0" max="1" step="0.05" /></label>
+        </div>
+
+        <div class="row row--three">
+          <label>hue-rotate, deg <input id="fl-hue" type="number" value="0" min="-180" max="180" step="5" /></label>
+          <label>invert <input id="fl-invert" type="number" value="0" min="0" max="1" step="0.05" /></label>
+          <label>opacity <input id="fl-op" type="number" value="1" min="0.1" max="1" step="0.05" /></label>
+        </div>
+
+        <div class="row row--two">
+          <label class="check">
+            <input id="fl-shadow-on" type="checkbox" />
+            drop-shadow
+          </label>
+          <label>
+            SVG-фильтр через url()
+            <select id="fl-url">
+              <option value="" selected>нет</option>
+              <option value="f-wave">волна (feDisplacementMap)</option>
+              <option value="f-noise">шум (feTurbulence)</option>
+              <option value="f-poster">постеризация</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--four">
+          <label>x, px <input id="fl-sh-x" type="number" value="0" step="1" /></label>
+          <label>y, px <input id="fl-sh-y" type="number" value="8" step="1" /></label>
+          <label>blur, px <input id="fl-sh-blur" type="number" value="12" min="0" step="1" /></label>
+          <label>цвет <input id="fl-sh-color" type="color" value="#1b1035" /></label>
+        </div>
+
+        <div class="presets" id="fl-presets">
+          <button type="button" data-fl="photo">фото</button>
+          <button type="button" data-fl="mono">ч/б</button>
+          <button type="button" data-fl="vintage">винтаж</button>
+          <button type="button" data-fl="turn">сдвиг оттенка</button>
+          <button type="button" data-fl="invert">инверсия</button>
+          <button type="button" data-fl="soft">размытие</button>
+          <button type="button" data-fl="reset">сброс</button>
+        </div>
+
+        <pre class="out" id="fl-code"></pre>
+      </section>
+
+      <!-- BACKDROP-FILTER -->
+      <section class="card">
+        <h1>backdrop-filter</h1>
+        <p class="hint">Фильтрует то, что позади элемента: эффект матового стекла. У самого элемента должен быть полупрозрачный фон.</p>
+
+        <div class="bf-stage">
+          <div class="bf-glass" id="bf-glass">стекло</div>
+        </div>
+
+        <div class="row row--three">
+          <label>blur, px <input id="bf-blur" type="number" value="8" min="0" max="20" step="1" /></label>
+          <label>saturate <input id="bf-sat" type="number" value="1.4" min="0" max="3" step="0.1" /></label>
+          <label>brightness <input id="bf-bright" type="number" value="1" min="0" max="2" step="0.05" /></label>
+        </div>
+
+        <div class="presets" id="bf-presets">
+          <button type="button" data-bf="glass">стекло</button>
+          <button type="button" data-bf="frost">мороз</button>
+          <button type="button" data-bf="clear">прозрачное</button>
+        </div>
+
+        <pre class="out" id="bf-code"></pre>
+      </section>
+
+      <!-- CLIP-PATH -->
+      <section class="card">
+        <h1>clip-path</h1>
+        <p class="hint">Обрезает элемент по фигуре: круг, эллипс, прямоугольник или многоугольник с произвольными точками.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="clip-demo" id="clip-box">clip-path</div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Фигура
+            <select id="clip-shape">
+              <option value="circle">circle(45%)</option>
+              <option value="ellipse">ellipse(45% 35%)</option>
+              <option value="inset">inset(10% round 16px)</option>
+              <option value="triangle">треугольник</option>
+              <option value="hex">шестиугольник</option>
+              <option value="star">звезда</option>
+            </select>
+          </label>
+          <label>Свой многоугольник <input id="clip-custom" type="text" placeholder="polygon(0 0, 100% 0, 50% 100%)" /></label>
+        </div>
+
+        <pre class="out" id="clip-code"></pre>
+      </section>
+
+      <!-- LINEAR-GRADIENT -->
+      <section class="card">
+        <h1>linear-gradient</h1>
+        <p class="hint">Переход по прямой. Направление — угол или ключевые слова <code>to …</code>. Цветов может быть сколько угодно — добавляйте кнопкой.</p>
+
+        <div class="grad-stage" id="lg-stage">
+          <div class="grad-dot" id="lg-dot"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Направление
+            <select id="lg-to">
+              <option value="to bottom">to bottom</option>
+              <option value="to right">to right</option>
+              <option value="to bottom right">to bottom right</option>
+              <option value="to top" selected>to top</option>
+              <option value="to left">to left</option>
+              <option value="to top right">to top right</option>
+              <option value="to bottom left">to bottom left</option>
+              <option value="to top left">to top left</option>
+              <option value="angle">свой угол</option>
+            </select>
+          </label>
+          <label>Угол, deg <input id="lg-angle" type="number" value="0" step="5" /></label>
+        </div>
+
+        <div class="stops" id="lg-stops"></div>
+        <div class="grad-actions">
+          <button id="lg-add" type="button">+ цвет</button>
+          <label class="switch"><input id="lg-repeat" type="checkbox" /> repeating</label>
+          <button class="ghost" id="lg-default" type="button" data-grad-reset="lg">3 цвета</button>
+        </div>
+
+        <pre class="out" id="lg-code"></pre>
+      </section>
+
+      <!-- RADIAL-GRADIENT -->
+      <section class="card">
+        <h1>radial-gradient</h1>
+        <p class="hint">Переход от центра наружу. Центр (<code>at</code>) тяните мышкой, цветов — сколько нужно.</p>
+
+        <div class="grad-stage" id="rg-stage">
+          <div class="grad-dot" id="rg-dot"></div>
+        </div>
+
+        <div class="row row--three">
+          <label>
+            Форма
+            <select id="rg-shape">
+              <option value="ellipse" selected>ellipse</option>
+              <option value="circle">circle</option>
+            </select>
+          </label>
+          <label>
+            Размер
+            <select id="rg-size">
+              <option value="farthest-corner" selected>farthest-corner</option>
+              <option value="closest-side">closest-side</option>
+              <option value="closest-corner">closest-corner</option>
+              <option value="farthest-side">farthest-side</option>
+            </select>
+          </label>
+          <div class="field">
+            <span class="field__label">Центр</span>
+            <span class="field__value" id="rg-at">50% 50%</span>
+          </div>
+        </div>
+
+        <div class="stops" id="rg-stops"></div>
+        <div class="grad-actions">
+          <button id="rg-add" type="button">+ цвет</button>
+          <label class="switch"><input id="rg-repeat" type="checkbox" /> repeating</label>
+          <button class="ghost" id="rg-default" type="button" data-grad-reset="rg">3 цвета</button>
+        </div>
+
+        <pre class="out" id="rg-code"></pre>
+      </section>
+
+      <!-- CONIC-GRADIENT -->
+      <section class="card">
+        <h1>conic-gradient</h1>
+        <p class="hint">Вращение вокруг центра: <code>from</code> — начальный угол, <code>at</code> — центр. Цветов может быть много.</p>
+
+        <div class="grad-stage grad-stage--conic" id="cg-stage">
+          <div class="grad-dot" id="cg-dot"></div>
+        </div>
+
+        <div class="sliders">
+          <label>from <input id="cg-from" type="range" min="0" max="360" value="0" /><output id="cg-from-out">0</output></label>
+        </div>
+
+        <div class="stops" id="cg-stops"></div>
+        <div class="grad-actions">
+          <button id="cg-add" type="button">+ цвет</button>
+          <label class="switch"><input id="cg-repeat" type="checkbox" /> repeating</label>
+          <button class="ghost" id="cg-default" type="button" data-grad-reset="cg">3 цвета</button>
+        </div>
+
+        <pre class="out" id="cg-code"></pre>
+      </section>
+
+      <!-- COLOR ANIMATION -->
+      <section class="card">
+        <h1>Анимация цвета</h1>
+        <p class="hint">Плавная смена цветов: фон, текст или текущий градиент. Кадры строятся из списка цветов, добавляйте сколько нужно.</p>
+
+        <div class="stage stage--text">
+          <div class="axis"></div>
+          <div class="ca-demo" id="ca-box">анимация</div>
+        </div>
+
+        <div class="row row--three">
+          <label>
+            Режим
+            <select id="ca-mode">
+              <option value="bg" selected>фон</option>
+              <option value="text">текст</option>
+              <option value="gradient">градиент</option>
+              <option value="angle">угол (@property)</option>
+              <option value="hue">перелив --hue (@property)</option>
+            </select>
+          </label>
+          <label>Длительность, с <input id="ca-dur" type="number" value="4" min="0.5" step="0.5" /></label>
+          <label>
+            Итерации
+            <select id="ca-iter">
+              <option value="infinite" selected>∞</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="hint hint--mode" id="ca-hint">цвет плавно переходит между кадрами</p>
+
+        <div class="row row--two">
+          <label>
+            Функция
+            <select id="ca-ease">
+              <option value="linear">linear</option>
+              <option value="ease-in-out" selected>ease-in-out</option>
+              <option value="ease">ease</option>
+              <option value="ease-in">ease-in</option>
+            </select>
+          </label>
+          <label>
+            Направление
+            <select id="ca-dir">
+              <option value="normal" selected>normal</option>
+              <option value="alternate">alternate</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="stops" id="ca-stops"></div>
+        <div class="grad-actions">
+          <button id="ca-add" type="button">+ цвет</button>
+          <button class="ghost" id="ca-default" type="button" data-grad-reset="ca">3 цвета</button>
+        </div>
+
+        <pre class="out" id="ca-code"></pre>
+      </section>
+
+      <!-- MIX-BLEND-MODE -->
+      <section class="card">
+        <h1>mix-blend-mode</h1>
+        <p class="hint">Как слои смешиваются с фоном и друг с другом. Слои бывают двух типов: пятно и текст — тяните их мышкой.</p>
+
+        <div class="mb-stage" id="mb-stage">
+          <div class="mb-base" id="mb-base"></div>
+        </div>
+
+        <div class="row row--two">
+          <label>Фон: цвет <input id="mb-bg" type="color" value="#4c1d95" /></label>
+          <label>
+            Режим для всех
+            <select id="mb-all" aria-label="Режим для всех слоёв"></select>
+          </label>
+        </div>
+
+        <div class="row row--three">
+          <label>Фон: ссылка <input id="mb-img-url" type="text" placeholder="https://…/photo.jpg" /></label>
+          <label>Фон: файл <input id="mb-img-file" type="file" accept="image/*" /></label>
+          <label>
+            Пример картинки
+            <select id="mb-img-kind">
+              <option value="" selected>нет (градиент)</option>
+              <option value="landscape">пейзаж</option>
+              <option value="portrait">портрет</option>
+              <option value="texture">текстура</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            Изоляция
+            <select id="mb-isolate">
+              <option value="yes" selected>isolation: isolate</option>
+              <option value="no">без isolation</option>
+            </select>
+          </label>
+          <label>Прозрачность слоёв <input id="mb-op" type="range" min="0.2" max="1" step="0.05" value="1" /></label>
+        </div>
+
+        <div class="mb-layers" id="mb-layers"></div>
+        <div class="grad-actions">
+          <button id="mb-add" type="button">+ пятно</button>
+          <button id="mb-add-text" type="button">+ текст</button>
+          <button class="ghost" id="mb-preset-duo" type="button" data-mb-preset="duo">дуотон</button>
+          <button class="ghost" id="mb-preset-neon" type="button" data-mb-preset="neon">неон</button>
+          <button class="ghost" id="mb-preset-retro" type="button" data-mb-preset="retro">ретро</button>
+          <button class="ghost" id="mb-img-reset" type="button">убрать картинку</button>
+          <button class="ghost" id="mb-default" type="button" data-grad-reset="mb">пример</button>
+        </div>
+
+        <pre class="out" id="mb-code"></pre>
+      </section>
+
+      <!-- BACKGROUND-BLEND-MODE -->
+      <section class="card">
+        <h1>background-blend-mode</h1>
+        <p class="hint">Смешивает слои внутри одного <code>background-image</code>: градиент + картинка. В отличие от <code>mix-blend-mode</code>, оба слоя — фоны одного элемента.</p>
+
+        <div class="bb-stage" id="bb-stage"></div>
+
+        <div class="row row--two">
+          <label>
+            Режим
+            <select id="bb-mode">
+              <option value="normal" selected>normal</option>
+              <option value="multiply">multiply</option>
+              <option value="screen">screen</option>
+              <option value="overlay">overlay</option>
+              <option value="darken">darken</option>
+              <option value="lighten">lighten</option>
+              <option value="color-dodge">color-dodge</option>
+              <option value="color-burn">color-burn</option>
+              <option value="hard-light">hard-light</option>
+              <option value="soft-light">soft-light</option>
+              <option value="difference">difference</option>
+              <option value="exclusion">exclusion</option>
+              <option value="hue">hue</option>
+              <option value="saturation">saturation</option>
+              <option value="color">color</option>
+              <option value="luminosity">luminosity</option>
+            </select>
+          </label>
+          <label>
+            Слоёв градиента
+            <select id="bb-count">
+              <option value="1" selected>1 градиент</option>
+              <option value="2">2 градиента</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>Прозрачность градиента <input id="bb-alpha" type="range" min="0.2" max="1" step="0.05" value="1" /></label>
+        </div>
+
+        <div class="stops" id="bb-stops"></div>
+        <div class="grad-actions">
+          <button id="bb-add" type="button">+ цвет</button>
+        </div>
+
+        <div class="row row--three">
+          <label>Картинка: ссылка <input id="bb-img-url" type="text" placeholder="https://…/photo.jpg" /></label>
+          <label>Картинка: файл <input id="bb-img-file" type="file" accept="image/*" /></label>
+          <label>
+            Пример картинки
+            <select id="bb-img-kind">
+              <option value="sample" selected>пример</option>
+              <option value="landscape">пейзаж</option>
+              <option value="portrait">портрет</option>
+              <option value="texture">текстура</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grad-actions">
+          <button class="ghost" id="bb-preset-duo" type="button" data-bb-preset="duo">дуотон</button>
+          <button class="ghost" id="bb-preset-neon" type="button" data-bb-preset="neon">неон</button>
+          <button class="ghost" id="bb-preset-vintage" type="button" data-bb-preset="vintage">винтаж</button>
+          <button class="ghost" id="bb-img-reset" type="button">вернуть пример</button>
+        </div>
+
+        <pre class="out" id="bb-code"></pre>
+      </section>
+
+      <!-- 3D -->
+      <section class="card">
+        <h1>3D-трансформации</h1>
+        <p class="hint">Ползунки для осей, перспективы и сдвигов. Пластина «Z …» показывает разницу transform-style: при flat схлопывается в плоскость карточки, при preserve-3d уходит вперёд — крутите ползунок «пластина Z», кнопку «−Z» и смотрите масштаб.</p>
+
+        <div class="stage">
+          <div class="axis"></div>
+          <div class="scene3d" id="scene3d">
+            <div class="flip3d" id="flip3d">
+              <div class="face face--front" id="faceFront">3D</div>
+              <div class="face face--back" id="faceBack">BACK</div>
+              <div class="plate" id="facePlate">Z +140</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row row--two">
+          <label class="slider-num">
+            perspective
+            <input id="persp" type="range" min="100" max="2000" step="25" value="800" />
+            <input id="persp-num" type="number" min="0" step="25" value="800" />
+          </label>
+          <label>
+            единицы
+            <select id="persp-unit">
+              <option value="px" selected>px</option>
+              <option value="em">em</option>
+              <option value="rem">rem</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label class="slider-num">
+            origin X
+            <input id="pox" type="range" min="0" max="100" step="1" value="50" />
+            <input id="pox-num" type="number" min="0" step="1" value="50" />
+          </label>
+          <label class="slider-num">
+            origin Y
+            <input id="poy" type="range" min="0" max="100" step="1" value="50" />
+            <input id="poy-num" type="number" min="0" step="1" value="50" />
+          </label>
+        </div>
+
+        <div class="row row--three">
+          <label class="slider-num">rotateX <input id="rx" type="range" min="-180" max="180" step="5" value="0" /><input id="rx-num" type="number" value="0" /></label>
+          <label class="slider-num">rotateY <input id="ry" type="range" min="-180" max="180" step="5" value="25" /><input id="ry-num" type="number" value="25" /></label>
+          <label class="slider-num">rotateZ <input id="rz" type="range" min="-180" max="180" step="5" value="0" /><input id="rz-num" type="number" value="0" /></label>
+        </div>
+
+        <div class="row row--three">
+          <label class="slider-num">translateX <input id="tx" type="range" min="-200" max="200" step="5" value="0" /><input id="tx-num" type="number" value="0" /></label>
+          <label class="slider-num">translateY <input id="ty" type="range" min="-200" max="200" step="5" value="0" /><input id="ty-num" type="number" value="0" /></label>
+          <label class="slider-num">translateZ <input id="tz" type="range" min="-300" max="300" step="10" value="0" /><input id="tz-num" type="number" value="0" /></label>
+        </div>
+
+        <div class="row row--three">
+          <label class="slider-num">scale <input id="scl" type="range" min="0.2" max="3" step="0.05" value="1" /><input id="scl-num" type="number" step="0.05" value="1" /></label>
+          <label class="slider-num">scaleZ <input id="sclz" type="range" min="0.2" max="3" step="0.05" value="1" /><input id="sclz-num" type="number" step="0.05" value="1" /></label>
+          <label>
+            perspective
+            <select id="pmode">
+              <option value="px" selected>px (объём)</option>
+              <option value="none">none (плоско)</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            transform-style
+            <select id="tstyle">
+              <option value="flat" selected>flat</option>
+              <option value="preserve-3d">preserve-3d</option>
+            </select>
+          </label>
+          <label>
+            backface-visibility
+            <select id="bfv">
+              <option value="visible" selected>visible</option>
+              <option value="hidden">hidden</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row row--three">
+          <label class="slider-num">
+            пластина Z, px
+            <input id="plate-z" type="range" min="0" max="400" step="10" value="140" />
+            <input id="plate-z-num" type="number" min="0" step="10" value="140" />
+          </label>
+          <div class="presets">
+            <button id="plate-sign" type="button">направить назад (−Z)</button>
+          </div>
+          <p class="mono plate-factor" id="plate-factor">масштаб ×1.21</p>
+        </div>
+
+        <div class="origin-pad" id="po-pad" title="Потяните точку — это perspective-origin">
+          <span class="origin-dot" id="po-dot"></span>
+          <span class="origin-pad__label">perspective-origin</span>
+        </div>
+
+        <pre class="out" id="code3d"></pre>
+      </section>
+
+      <!-- TEXT-STROKE -->
+      <section class="card">
+        <h1>text-stroke</h1>
+        <p class="hint">Обводка текста: <code>-webkit-text-stroke</code> или восемь теней. Сравните, как ведут себя тонкие и толстые штрихи.</p>
+
+        <div class="ts-stage">
+          <span class="ts-text" id="ts-text">Обводка</span>
+        </div>
+
+        <div class="row row--two">
+          <label class="slider-num">
+            толщина, px
+            <input id="ts-width" type="range" min="0" max="8" step="0.5" value="2" />
+            <input id="ts-width-num" type="number" min="0" step="0.5" value="2" />
+          </label>
+          <label class="slider-num">
+            размер, px
+            <input id="ts-size" type="range" min="24" max="160" step="2" value="72" />
+            <input id="ts-size-num" type="number" min="8" step="2" value="72" />
+          </label>
+        </div>
+
+        <div class="row row--two">
+          <label>цвет обводки <input id="ts-color" type="color" value="#7c3aed" /></label>
+          <label>цвет заливки <input id="ts-fill" type="color" value="#1b1035" /></label>
+        </div>
+
+        <div class="row row--two">
+          <label>
+            способ
+            <select id="ts-mode">
+              <option value="stroke" selected>-webkit-text-stroke</option>
+              <option value="shadow">8 теней (фолбэк)</option>
+              <option value="svg">SVG paint-order</option>
+            </select>
+          </label>
+          <label>
+            текст
+            <input id="ts-word" type="text" value="Обводка" />
+          </label>
+        </div>
+
+        <pre class="out" id="ts-code"></pre>
+      </section>
+
+    </main>
+
+    <svg width="0" height="0" aria-hidden="true" style="position: absolute">
+      <filter id="f-wave" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="18" />
+      </filter>
+      <filter id="f-noise" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise" />
+        <feBlend in="SourceGraphic" in2="noise" mode="overlay" />
+      </filter>
+      <filter id="f-poster">
+        <feComponentTransfer>
+          <feFuncR type="discrete" tableValues="0 0.33 0.66 1" />
+          <feFuncG type="discrete" tableValues="0 0.33 0.66 1" />
+          <feFuncB type="discrete" tableValues="0 0.33 0.66 1" />
+        </feComponentTransfer>
+      </filter>
+    </svg>
+
+    <script>
+      /* ---------- углы ---------- */
+      const value = document.getElementById('value');
+      const unit = document.getElementById('unit');
+      const slider = document.getElementById('slider');
+      const box = document.getElementById('box');
+      const out = {
+        deg: document.getElementById('out-deg'),
+        turn: document.getElementById('out-turn'),
+        rad: document.getElementById('out-rad'),
+        grad: document.getElementById('out-grad'),
+      };
+
+      const toDeg = {
+        deg: (v) => v,
+        turn: (v) => v * 360,
+        rad: (v) => (v * 180) / Math.PI,
+        grad: (v) => v * 0.9,
+      };
+
+      const fmt = (n, digits) =>
+        n.toLocaleString('ru-RU', { minimumFractionDigits: 0, maximumFractionDigits: digits });
+
+      function renderAngles() {
+        const deg = toDeg[unit.value](Number(value.value) || 0);
+        box.style.setProperty('--deg', deg + 'deg');
+        out.deg.textContent = fmt(deg, 2) + '°';
+        out.turn.textContent = fmt(deg / 360, 4);
+        out.rad.textContent = fmt((deg * Math.PI) / 180, 4);
+        out.grad.textContent = fmt(deg / 0.9, 2);
+        slider.value = String(((deg % 360) + 360) % 360);
+      }
+
+      value.addEventListener('input', renderAngles);
+      unit.addEventListener('change', renderAngles);
+      slider.addEventListener('input', () => {
+        unit.value = 'deg';
+        value.value = slider.value;
+        renderAngles();
+      });
+
+      /* ---------- анимация ---------- */
+      const animBox = document.getElementById('anim-box');
+      const effect = document.getElementById('effect');
+      const to = document.getElementById('to');
+      const valueUnit = document.getElementById('value-unit');
+      const duration = document.getElementById('duration');
+      const delay = document.getElementById('delay');
+      const easing = document.getElementById('easing');
+      const iterations = document.getElementById('iterations');
+      const direction = document.getElementById('direction');
+      const fill = document.getElementById('fill');
+      const elapsed = document.getElementById('elapsed');
+      const total = document.getElementById('total');
+      const code = document.getElementById('code');
+      const playBtn = document.getElementById('play');
+
+      let current = null;
+      let raf = 0;
+
+      function keyframesFor(kind, target) {
+        switch (kind) {
+          case 'rotate':
+            return [{ rotate: '0deg' }, { rotate: target + 'deg' }];
+          case 'translate':
+            return [{ translate: '0 0' }, { translate: target + 'px 0' }];
+          case 'scale':
+            return [{ scale: '1' }, { scale: String(target) }];
+          default:
+            return [{ opacity: '1' }, { opacity: String(target) }];
+        }
+      }
+
+      function unitsForEffect(kind) {
+        if (kind === 'rotate') return 'deg';
+        if (kind === 'translate') return 'px';
+        if (kind === 'scale') return 'раз';
+        return '0…1';
+      }
+
+      function cssFor(kind, target, dur, del, ease, iters) {
+        const prop =
+          kind === 'rotate' ? 'rotate' : kind === 'translate' ? 'translate' : kind;
+        const toValue =
+          kind === 'rotate'
+            ? target + 'deg'
+            : kind === 'translate'
+              ? target + 'px 0'
+              : String(target);
+
+        return `@keyframes demo {
+  to { ${prop}: ${toValue}; }
+}
+
+.anim-box {
+  animation-name: demo;
+  animation-duration: ${dur}s;
+  animation-timing-function: ${ease};
+  animation-delay: ${del}s;
+  animation-iteration-count: ${iters};
+  animation-direction: ${direction.value};
+  animation-fill-mode: both;
+}`;
+      }
+
+      function formatSeconds(ms) {
+        return (ms / 1000).toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + ' с';
+      }
+
+      function stopAnimation() {
+        cancelAnimationFrame(raf);
+        if (current) {
+          current.cancel();
+          current = null;
+        }
+        fill.style.inlineSize = '0%';
+      }
+
+      function run() {
+        stopAnimation();
+
+        const kind = effect.value;
+        const target = Number(to.value) || 0;
+        const dur = Math.max(0.1, Number(duration.value) || 0.1);
+        const del = Math.max(0, Number(delay.value) || 0);
+        const ease = easing.value;
+        const iters = iterations.value === 'infinite' ? Infinity : Number(iterations.value);
+
+        current = animBox.animate(keyframesFor(kind, target), {
+          duration: dur * 1000,
+          delay: del * 1000,
+          easing: ease,
+          iterations: iters,
+          direction: direction.value,
+          fill: 'both',
+        });
+
+        const totalMs = iters === Infinity ? Infinity : del * 1000 + dur * 1000 * iters;
+        total.textContent = iters === Infinity ? '∞' : formatSeconds(totalMs);
+        code.textContent = cssFor(kind, target, dur, del, ease, iterations.value);
+
+        const count = iters === Infinity ? "infinite" : iters;
+        document.getElementById("short").textContent =
+          `animation: demo ${dur}s ${ease} ${del}s ${count} ${direction.value} both;`;
+        valueUnit.textContent = unitsForEffect(kind);
+
+        const tick = () => {
+          if (!current) return;
+          const now = current.currentTime || 0;
+          let progress = 0;
+
+          if (now >= del * 1000) {
+            const local = now - del * 1000;
+            progress =
+              iters === Infinity
+                ? (local / (dur * 1000)) % 1
+                : Math.min(1, local / (dur * 1000 * iters));
+          }
+
+          const shown =
+            iters === Infinity
+              ? now < del * 1000
+                ? 0
+                : (now - del * 1000) % (dur * 1000)
+              : now;
+
+          fill.style.inlineSize = (progress * 100).toFixed(2) + '%';
+          elapsed.textContent = formatSeconds(shown);
+          raf = requestAnimationFrame(tick);
+        };
+
+        raf = requestAnimationFrame(tick);
+
+        if (totalMs !== Infinity) {
+          current.finished.then(() => {
+            if (!current) return;
+            fill.style.inlineSize = '100%';
+            elapsed.textContent = formatSeconds(totalMs);
+          });
+        }
+      }
+
+      [effect, to, duration, delay, easing, iterations, direction].forEach((el) =>
+        el.addEventListener('input', () => {
+          valueUnit.textContent = unitsForEffect(effect.value);
+          run();
+        }),
+      );
+
+      playBtn.addEventListener('click', run);
+
+      /* ---------- 3D ---------- */
+      const persp = document.getElementById("persp");
+      const perspNum = document.getElementById("persp-num");
+      const perspUnit = document.getElementById("persp-unit");
+      const pox = document.getElementById("pox");
+      const poxNum = document.getElementById("pox-num");
+      const poy = document.getElementById("poy");
+      const poyNum = document.getElementById("poy-num");
+      const rx = document.getElementById("rx");
+      const rxNum = document.getElementById("rx-num");
+      const ry = document.getElementById("ry");
+      const ryNum = document.getElementById("ry-num");
+      const rz = document.getElementById("rz");
+      const rzNum = document.getElementById("rz-num");
+      const tx = document.getElementById("tx");
+      const txNum = document.getElementById("tx-num");
+      const ty = document.getElementById("ty");
+      const tyNum = document.getElementById("ty-num");
+      const tz = document.getElementById("tz");
+      const tzNum = document.getElementById("tz-num");
+      const scl = document.getElementById("scl");
+      const sclNum = document.getElementById("scl-num");
+      const sclz = document.getElementById("sclz");
+      const sclzNum = document.getElementById("sclz-num");
+      const pmode = document.getElementById("pmode");
+      const tstyle = document.getElementById("tstyle");
+      const bfv = document.getElementById("bfv");
+      const poPad = document.getElementById("po-pad");
+      const poDot = document.getElementById("po-dot");
+      const scene3d = document.getElementById("scene3d");
+      const flip3d = document.getElementById("flip3d");
+      const faceFront = document.getElementById("faceFront");
+      const faceBack = document.getElementById("faceBack");
+      const facePlate = document.getElementById("facePlate");
+      const plateZ = document.getElementById("plate-z");
+      const plateZNum = document.getElementById("plate-z-num");
+      const plateSignBtn = document.getElementById("plate-sign");
+      const plateFactor = document.getElementById("plate-factor");
+
+      let plateSign = 1;
+      const code3d = document.getElementById("code3d");
+
+      const pairs = [
+        [persp, perspNum], [pox, poxNum], [poy, poyNum],
+        [rx, rxNum], [ry, ryNum], [rz, rzNum],
+        [tx, txNum], [ty, tyNum], [tz, tzNum],
+        [scl, sclNum], [sclz, sclzNum], [plateZ, plateZNum],
+      ];
+
+      pairs.forEach(([range, num]) => {
+        range.addEventListener("input", () => { num.value = range.value; render3d(); });
+        num.addEventListener("input", () => {
+          const v = Number(num.value);
+          if (Number.isFinite(v)) range.value = String(v);
+          render3d();
+        });
+      });
+
+      function render3d() {
+        const p = Math.max(0, Number(perspNum.value) || 0);
+        const ox = Number(poxNum.value) || 0;
+        const oy = Number(poyNum.value) || 0;
+        const x = Number(rxNum.value) || 0;
+        const y = Number(ryNum.value) || 0;
+        const w = Number(rzNum.value) || 0;
+        const dx = Number(txNum.value) || 0;
+        const dy = Number(tyNum.value) || 0;
+        const dz = Number(tzNum.value) || 0;
+        const sc = Number(sclNum.value) || 1;
+        const scz = Number(sclzNum.value) || 1;
+        const style = tstyle.value;
+        const backface = bfv.value;
+        const perspectiveValue = pmode.value === "none" ? "none" : `${p}${perspUnit.value}`;
+        const originValue = `${ox}% ${oy}%`;
+
+        scene3d.style.perspective = perspectiveValue;
+        scene3d.style.perspectiveOrigin = originValue;
+        flip3d.style.transformStyle = style;
+        flip3d.style.transform =
+          `translate3d(${dx}px, ${dy}px, ${dz}px) ` +
+          `rotateX(${x}deg) rotateY(${y}deg) rotateZ(${w}deg) ` +
+          `scale3d(${sc}, ${sc}, ${scz})`;
+        const pz = Number(plateZNum.value) || 0;
+        const signedZ = pz * plateSign;
+        facePlate.style.transform = `translateZ(${signedZ}px)`;
+        facePlate.textContent = `Z ${plateSign > 0 ? "+" : "−"}${pz}`;
+        if (p > 0 && Math.abs(signedZ) < p * 0.95) {
+          const factor = p / (p - signedZ);
+          plateFactor.textContent = `масштаб ×${factor.toFixed(2)}`;
+        } else {
+          plateFactor.textContent = "масштаб ×∞";
+        }
+
+        faceFront.style.backfaceVisibility = backface;
+        faceBack.style.backfaceVisibility = backface;
+        poDot.style.left = ox + "%";
+        poDot.style.top = oy + "%";
+
+        code3d.textContent = `.scene {
+  perspective: ${perspectiveValue};
+  perspective-origin: ${originValue};
+}
+
+.card {
+  transform-style: ${style};
+  transform:
+    translate3d(${dx}px, ${dy}px, ${dz}px)
+    rotateX(${x}deg)
+    rotateY(${y}deg)
+    rotateZ(${w}deg)
+    scale3d(${sc}, ${sc}, ${scz});
+}
+
+.card__face {
+  backface-visibility: ${backface};
+}`;
+      }
+
+      [perspUnit, pmode, tstyle, bfv].forEach((el) => el.addEventListener("input", render3d));
+
+      plateSignBtn.addEventListener("click", () => {
+        plateSign *= -1;
+        plateSignBtn.textContent = plateSign > 0 ? "направить назад (−Z)" : "вернуть вперёд (+Z)";
+        render3d();
+      });
+
+      let poActive = false;
+      function poMove(event) {
+        const rect = poPad.getBoundingClientRect();
+        const x = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
+        poxNum.value = Math.round(x);
+        poyNum.value = Math.round(y);
+        pox.value = String(Math.round(x));
+        poy.value = String(Math.round(y));
+        render3d();
+      }
+
+      poPad.addEventListener("pointerdown", (event) => {
+        poActive = true;
+        try { poPad.setPointerCapture(event.pointerId); } catch (error) { /* синтетические события */ }
+        poMove(event);
+      });
+      poPad.addEventListener("pointermove", (event) => { if (poActive) poMove(event); });
+      poPad.addEventListener("pointerup", () => { poActive = false; });
+      poPad.addEventListener("pointercancel", () => { poActive = false; });
+
+      /* ---------- translate ---------- */
+      const trBox = document.getElementById("tr-box");
+      const trX = document.getElementById("tr-x");
+      const trY = document.getElementById("tr-y");
+      const trSliderX = document.getElementById("tr-slider-x");
+      const trSliderY = document.getElementById("tr-slider-y");
+      const trCode = document.getElementById("tr-code");
+      const trShort = document.getElementById("tr-short");
+
+      function renderTranslate() {
+        const x = Number(trX.value) || 0;
+        const y = Number(trY.value) || 0;
+        trBox.style.translate = `${x}px ${y}px`;
+        trSliderX.value = String(Math.max(-150, Math.min(150, x)));
+        trSliderY.value = String(Math.max(-90, Math.min(90, y)));
+        trCode.textContent = `/* новый синтаксис: отдельное свойство */
+.card {
+  translate: ${x}px ${y}px;
+}
+
+/* старый синтаксис: функция внутри transform */
+.card {
+  transform: translate(${x}px, ${y}px);
+}`;
+        trShort.textContent = `translate: ${x}px ${y}px;`;
+      }
+
+      [trX, trY].forEach((el) => el.addEventListener("input", renderTranslate));
+      trSliderX.addEventListener("input", () => {
+        trX.value = trSliderX.value;
+        renderTranslate();
+      });
+      trSliderY.addEventListener("input", () => {
+        trY.value = trSliderY.value;
+        renderTranslate();
+      });
+
+      /* ---------- transition ---------- */
+      const tBox = document.getElementById("t-box");
+      const tStage = document.getElementById("t-stage");
+      const tProp = document.getElementById("t-prop");
+      const tTo = document.getElementById("t-to");
+      const tDur = document.getElementById("t-dur");
+      const tDelay = document.getElementById("t-delay");
+      const tEase = document.getElementById("t-ease");
+      const tBtn = document.getElementById("t-toggle");
+      const tCode = document.getElementById("t-code");
+      const tShort = document.getElementById("t-short");
+
+      let tOn = false;
+
+      function tOptions() {
+        return {
+          prop: tProp.value,
+          dur: Math.max(0.1, Number(tDur.value) || 0.1),
+          delay: Math.max(0, Number(tDelay.value) || 0),
+          ease: tEase.value,
+        };
+      }
+
+      function tTarget(prop) {
+        const raw = Number(tTo.value) || 0;
+        if (prop === "translate") return `${raw}px 0`;
+        if (prop === "rotate") return `${raw}deg`;
+        if (prop === "scale") return String(raw);
+        return String(Math.min(1, Math.max(0, raw)));
+      }
+
+      function tApplyStyle() {
+        const { prop, dur, delay, ease } = tOptions();
+        tBox.style.transitionProperty = prop;
+        tBox.style.transitionDuration = dur + "s";
+        tBox.style.transitionTimingFunction = ease;
+        tBox.style.transitionDelay = delay + "s";
+      }
+
+      function tSetState(on) {
+        tOn = on;
+        const { prop } = tOptions();
+        tBox.style.translate = prop === "translate" && on ? tTarget("translate") : "0 0";
+        tBox.style.rotate = prop === "rotate" && on ? tTarget("rotate") : "0deg";
+        tBox.style.scale = prop === "scale" && on ? tTarget("scale") : "1";
+        tBox.style.opacity = prop === "opacity" ? (on ? tTarget("opacity") : "1") : "1";
+      }
+
+      function renderTransition() {
+        const { prop, dur, delay, ease } = tOptions();
+        tApplyStyle();
+        tSetState(tOn);
+        tCode.textContent = `.box {
+  transition-property: ${prop};
+  transition-duration: ${dur}s;
+  transition-timing-function: ${ease};
+  transition-delay: ${delay}s;
+}
+
+.box:hover {
+  ${prop}: ${tTarget(prop)};
+}`;
+        tShort.textContent = `transition: ${prop} ${dur}s ${ease} ${delay}s;`;
+      }
+
+      [tProp, tTo, tDur, tDelay, tEase].forEach((el) =>
+        el.addEventListener("input", renderTransition),
+      );
+
+      tBtn.addEventListener("click", () => tSetState(!tOn));
+      tStage.addEventListener("mouseenter", () => tSetState(true));
+      tStage.addEventListener("mouseleave", () => tSetState(false));
+
+      /* ---------- transform ---------- */
+      const tfBox = document.getElementById("tf-box");
+      const tfRot = document.getElementById("tf-rot");
+      const tfScale = document.getElementById("tf-scale");
+      const tfSkew = document.getElementById("tf-skew");
+      const tfOx = document.getElementById("tf-ox");
+      const tfOy = document.getElementById("tf-oy");
+      const tfCode = document.getElementById("tf-code");
+      const tfX3 = document.getElementById("tf-x3");
+      const tfY3 = document.getElementById("tf-y3");
+      const tfZ3 = document.getElementById("tf-z3");
+      const tfA3 = document.getElementById("tf-a3");
+      const tfBoxEl = document.getElementById("tf-box");
+
+      const tfPad = document.getElementById("tf-pad");
+      const tfDot = document.getElementById("tf-dot");
+
+      function renderTransform() {
+        const rot = Number(tfRot.value) || 0;
+        const sc = Number(tfScale.value) || 1;
+        const sk = Number(tfSkew.value) || 0;
+        const ox = Number(tfOx.value);
+        const oy = Number(tfOy.value);
+
+        tfDot.style.left = ox + "%";
+        tfDot.style.top = oy + "%";
+        const x3 = Number(tfX3.value) || 0;
+        const y3 = Number(tfY3.value) || 0;
+        const z3 = Number(tfZ3.value) || 0;
+        const a3 = Number(tfA3.value) || 0;
+        const useRotate3d = a3 !== 0;
+        const rotate3dLine = useRotate3d ? ` rotate3d(${x3}, ${y3}, ${z3}, ${a3}deg)` : "";
+
+        tfBox.style.rotate = rot + "deg";
+        tfBox.style.scale = String(sc);
+        tfBox.style.transform = `skew(${sk}deg)${rotate3dLine}`;
+        tfBox.style.transformOrigin = `${ox}% ${oy}%`;
+        tfBox.style.transformBox = tfBoxEl.value;
+
+        tfCode.textContent = `.box {
+  rotate: ${rot}deg;
+  scale: ${sc};
+  transform: skew(${sk}deg)${useRotate3d ? ` rotate3d(${x3}, ${y3}, ${z3}, ${a3}deg)` : ""};
+  transform-origin: ${ox}% ${oy}%;
+  transform-box: ${tfBoxEl.value};
+}`;
+      }
+
+      [tfRot, tfScale, tfSkew, tfOx, tfOy, tfX3, tfY3, tfZ3, tfA3, tfBoxEl].forEach((el) =>
+        el.addEventListener("input", renderTransform),
+      );
+
+      function moveOrigin(event) {
+        const rect = tfPad.getBoundingClientRect();
+        const x = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100));
+        const y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
+        tfOx.value = Math.round(x);
+        tfOy.value = Math.round(y);
+        renderTransform();
+      }
+
+      let padActive = false;
+
+      tfPad.addEventListener("pointerdown", (event) => {
+        padActive = true;
+        tfPad.setPointerCapture(event.pointerId);
+        moveOrigin(event);
+      });
+
+      tfPad.addEventListener("pointermove", (event) => {
+        if (padActive) moveOrigin(event);
+      });
+
+      tfPad.addEventListener("pointerup", () => { padActive = false; });
+      tfPad.addEventListener("pointercancel", () => { padActive = false; });
+
+      /* ---------- кривая ---------- */
+      const cvSvg = document.getElementById("curve");
+      const cvPath = document.getElementById("cv-path");
+      const cvH1 = document.getElementById("cv-h1");
+      const cvH2 = document.getElementById("cv-h2");
+      const cvG1 = document.getElementById("cv-g1");
+      const cvG2 = document.getElementById("cv-g2");
+      const cvCode = document.getElementById("cv-code");
+      const cvBox = document.getElementById("cv-box");
+      const cvPlay = document.getElementById("cv-play");
+      const cvPresets = document.getElementById("cv-presets");
+
+      const CV = { x1: 0.25, y1: 0.1, x2: 0.25, y2: 1 };
+      const cvMapX = (x) => 20 + x * 180;
+      const cvMapY = (y) => 200 - y * 180;
+      const cvValue = () =>
+        `cubic-bezier(${CV.x1.toFixed(2)}, ${CV.y1.toFixed(2)}, ${CV.x2.toFixed(2)}, ${CV.y2.toFixed(2)})`;
+
+      function cvDraw() {
+        cvPath.setAttribute(
+          "d",
+          `M 20 200 C ${cvMapX(CV.x1)} ${cvMapY(CV.y1)}, ${cvMapX(CV.x2)} ${cvMapY(CV.y2)}, 200 20`,
+        );
+        cvH1.setAttribute("cx", cvMapX(CV.x1));
+        cvH1.setAttribute("cy", cvMapY(CV.y1));
+        cvH2.setAttribute("cx", cvMapX(CV.x2));
+        cvH2.setAttribute("cy", cvMapY(CV.y2));
+        cvG1.setAttribute("x2", cvMapX(CV.x1));
+        cvG1.setAttribute("y2", cvMapY(CV.y1));
+        cvG2.setAttribute("x2", cvMapX(CV.x2));
+        cvG2.setAttribute("y2", cvMapY(CV.y2));
+
+        cvCode.textContent = `/* transition */
+transition-timing-function:
+  ${cvValue()};
+
+/* animation */
+animation-timing-function:
+  ${cvValue()};`;
+      }
+
+      let cvDrag = 0;
+
+      function cvMove(e) {
+        if (!cvDrag) return;
+        const r = cvSvg.getBoundingClientRect();
+        const sx = ((e.clientX - r.left) / r.width) * 220;
+        const sy = ((e.clientY - r.top) / r.height) * 220;
+        const x = Math.min(1, Math.max(0, (sx - 20) / 180));
+        const y = Math.min(1.4, Math.max(-0.4, (200 - sy) / 180));
+        if (cvDrag === 1) {
+          CV.x1 = x;
+          CV.y1 = y;
+        } else {
+          CV.x2 = x;
+          CV.y2 = y;
+        }
+        cvDraw();
+      }
+
+      [cvH1, cvH2].forEach((h, i) => {
+        h.addEventListener("pointerdown", (e) => {
+          cvDrag = i + 1;
+          cvSvg.setPointerCapture(e.pointerId);
+          e.preventDefault();
+        });
+      });
+      cvSvg.addEventListener("pointermove", cvMove);
+      cvSvg.addEventListener("pointerup", () => {
+        cvDrag = 0;
+      });
+      cvSvg.addEventListener("pointercancel", () => {
+        cvDrag = 0;
+      });
+
+      cvPresets.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const [x1, y1, x2, y2] = btn.dataset.b.split(",").map(Number);
+        CV.x1 = x1;
+        CV.y1 = y1;
+        CV.x2 = x2;
+        CV.y2 = y2;
+        cvDraw();
+      });
+
+      cvPlay.addEventListener("click", () => {
+        cvBox.getAnimations().forEach((a) => a.cancel());
+        cvBox.animate(
+          [
+            { translate: "0 0" },
+            { translate: "120px 0" },
+            { translate: "0 0" },
+          ],
+          { duration: 1200, easing: cvValue(), iterations: 1, fill: "both" },
+        );
+      });
+
+      /* ---------- @keyframes редактор ---------- */
+      const KF_STEPS = [0, 25, 50, 75, 100];
+      const kfBox = document.getElementById("kf-box");
+      const kfDur = document.getElementById("kf-dur");
+      const kfIters = document.getElementById("kf-iters");
+      const kfCode = document.getElementById("kf-code");
+      const kfPlayBtn = document.getElementById("kf-play");
+
+      const kfEl = {};
+      KF_STEPS.forEach((p) => {
+        kfEl[p] = {
+          x: document.getElementById("kf-x-" + p),
+          r: document.getElementById("kf-r-" + p),
+          s: document.getElementById("kf-s-" + p),
+          o: document.getElementById("kf-o-" + p),
+        };
+      });
+
+      const kfClamp01 = (n) => Math.min(1, Math.max(0, n));
+
+      function kfRead() {
+        return KF_STEPS.map((p) => ({
+          p,
+          x: Number(kfEl[p].x.value) || 0,
+          r: Number(kfEl[p].r.value) || 0,
+          s: Number(kfEl[p].s.value) || 1,
+          o: kfClamp01(Number(kfEl[p].o.value) || 0),
+        }));
+      }
+
+      function kfFrameText(d) {
+        return `  ${d.p}% {
+    translate: ${d.x}px 0;
+    rotate: ${d.r}deg;
+    scale: ${d.s};
+    opacity: ${d.o};
+  }`;
+      }
+
+      function renderKf() {
+        const frames = kfRead();
+        const dur = Math.max(0.2, Number(kfDur.value) || 2);
+        const iters = kfIters.value;
+        kfCode.textContent = `@keyframes steps {
+${frames.map(kfFrameText).join("\n")}
+}
+
+.box {
+  animation: steps ${dur}s linear ${iters} both;
+}`;
+      }
+
+      function kfPlayNow() {
+        const frames = kfRead().map((d) => ({
+          offset: d.p / 100,
+          translate: `${d.x}px 0`,
+          rotate: `${d.r}deg`,
+          scale: String(d.s),
+          opacity: String(d.o),
+        }));
+        const dur = Math.max(0.2, Number(kfDur.value) || 2);
+        const iters = kfIters.value === "infinite" ? Infinity : Number(kfIters.value);
+        kfBox.getAnimations().forEach((a) => a.cancel());
+        kfBox.animate(frames, {
+          duration: dur * 1000,
+          iterations: iters,
+          easing: "linear",
+          fill: "both",
+        });
+      }
+
+      KF_STEPS.forEach((p) =>
+        [kfEl[p].x, kfEl[p].r, kfEl[p].s, kfEl[p].o].forEach((el) =>
+          el.addEventListener("input", renderKf),
+        ),
+      );
+      [kfDur, kfIters].forEach((el) => el.addEventListener("input", renderKf));
+      kfPlayBtn.addEventListener("click", kfPlayNow);
+
+      /* ---------- тени: слои ---------- */
+      const SHADOW_COLORS = {
+        "27 16 53": "тёмный",
+        "124 58 237": "фиолетовый",
+        "52 211 153": "зелёный",
+        "244 114 182": "розовый",
+        "251 191 36": "жёлтый",
+        "0 0 0": "чёрный",
+        "255 255 255": "белый",
+      };
+
+      function colorOptions(selected) {
+        return Object.entries(SHADOW_COLORS)
+          .map(([v, label]) => `<option value="${v}"${v === selected ? " selected" : ""}>${label}</option>`)
+          .join("");
+      }
+
+      function num(v, d) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : d;
+      }
+
+      /* --- box-shadow --- */
+      const bsBox = document.getElementById("bs-box");
+      const bsLayers = document.getElementById("bs-layers");
+      const bsAdd = document.getElementById("bs-add");
+      const bsReset = document.getElementById("bs-reset");
+      const bsPresets = document.getElementById("bs-presets");
+      const bsCode = document.getElementById("bs-code");
+
+      const BS_PRESETS = {
+        card: [
+          { x: 0, y: 1, blur: 2, spread: 0, color: "27 16 53", a: 0.06 },
+          { x: 0, y: 8, blur: 24, spread: 0, color: "27 16 53", a: 0.12 },
+        ],
+        soft: [
+          { x: 0, y: 4, blur: 12, spread: 0, color: "27 16 53", a: 0.1 },
+          { x: 0, y: 12, blur: 32, spread: 0, color: "27 16 53", a: 0.08 },
+        ],
+        ring: [
+          { x: 0, y: 0, blur: 0, spread: 3, color: "124 58 237", a: 0.9 },
+          { x: 0, y: 0, blur: 0, spread: 6, color: "124 58 237", a: 0.35 },
+        ],
+        neon: [
+          { x: 0, y: 0, blur: 8, spread: 0, color: "124 58 237", a: 0.9 },
+          { x: 0, y: 0, blur: 24, spread: 0, color: "124 58 237", a: 0.7 },
+          { x: 0, y: 0, blur: 48, spread: 0, color: "124 58 237", a: 0.45 },
+        ],
+        "3d": [
+          { x: 1, y: 1, blur: 0, spread: 0, color: "124 58 237", a: 0.9 },
+          { x: 2, y: 2, blur: 0, spread: 0, color: "124 58 237", a: 0.8 },
+          { x: 3, y: 3, blur: 0, spread: 0, color: "124 58 237", a: 0.7 },
+          { x: 4, y: 4, blur: 0, spread: 0, color: "27 16 53", a: 0.6 },
+          { x: 0, y: 8, blur: 20, spread: 0, color: "27 16 53", a: 0.25 },
+        ],
+      };
+
+      let bsState = BS_PRESETS.card.map((l) => ({ ...l }));
+
+      function bsLayerRow(layer, index) {
+        const el = document.createElement("div");
+        el.className = "layer";
+        el.dataset.index = String(index);
+        el.innerHTML = `
+          <div class="layer__head">
+            <b>слой ${index + 1}</b>
+            <button class="layer__del" type="button">удалить</button>
+          </div>
+          <div class="row row--four">
+            <label>x, px <input type="number" data-k="x" value="${layer.x}" step="1" /></label>
+            <label>y, px <input type="number" data-k="y" value="${layer.y}" step="1" /></label>
+            <label>blur, px <input type="number" data-k="blur" min="0" value="${layer.blur}" step="1" /></label>
+            <label>spread, px <input type="number" data-k="spread" value="${layer.spread}" step="1" /></label>
+          </div>
+          <div class="row row--two">
+            <label>цвет <select data-k="color">${colorOptions(layer.color)}</select></label>
+            <label>alpha <input type="number" data-k="a" min="0.05" max="1" step="0.05" value="${layer.a}" /></label>
+          </div>`;
+        el.addEventListener("input", () => {
+          const i = Number(el.dataset.index);
+          el.querySelectorAll("[data-k]").forEach((inp) => {
+            const k = inp.dataset.k;
+            bsState[i][k] = k === "color" ? inp.value : num(inp.value, 0);
+          });
+          renderBoxShadow();
+        });
+        el.querySelector(".layer__del").addEventListener("click", () => {
+          if (bsState.length <= 1) return;
+          bsState.splice(Number(el.dataset.index), 1);
+          renderBoxShadow(true);
+        });
+        return el;
+      }
+
+      function formatColor(triplet, alpha, format) {
+        const [r, g, b] = triplet.split(" ").map(Number);
+        const a = Math.round(Math.min(1, Math.max(0.05, alpha)) * 100) / 100;
+        if (format === "hex") {
+          const hex = "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+          return a >= 1 ? hex : hex + componentToHex(Math.round(a * 255));
+        }
+        if (format === "hsl") {
+          const { h, s, l } = rgbToHsl({ r, g, b });
+          return a >= 1 ? `hsl(${h} ${s}% ${l}%)` : `hsl(${h} ${s}% ${l}% / ${a})`;
+        }
+        return `rgb(${triplet} / ${a})`;
+      }
+
+      function bsValueOf(layer) {
+        const a = Math.min(1, Math.max(0.05, layer.a));
+        const format = document.getElementById("bs-format").value;
+        return `${layer.x}px ${layer.y}px ${Math.max(0, layer.blur)}px ${layer.spread}px ${formatColor(layer.color, a, format)}`;
+      }
+
+      function renderBoxShadow(rebuild) {
+        if (rebuild) {
+          bsLayers.replaceChildren(...bsState.map(bsLayerRow));
+        }
+        const value = bsState.map(bsValueOf).join(",\n    ");
+        bsBox.style.boxShadow = bsState.map(bsValueOf).join(", ");
+        bsCode.textContent = `.box {\n  box-shadow:\n    ${value};\n}`;
+      }
+
+      bsAdd.addEventListener("click", () => {
+        const last = bsState[bsState.length - 1] || { x: 0, y: 4, blur: 12, spread: 0, color: "27 16 53", a: 0.12 };
+        bsState.push({ ...last, blur: Math.max(0, last.blur + 8), a: Math.max(0.05, last.a - 0.03) });
+        renderBoxShadow(true);
+      });
+
+      bsReset.addEventListener("click", () => {
+        bsState = BS_PRESETS.card.map((l) => ({ ...l }));
+        renderBoxShadow(true);
+      });
+
+      bsPresets.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const preset = BS_PRESETS[btn.dataset.bs];
+        if (!preset) return;
+        bsState = preset.map((l) => ({ ...l }));
+        renderBoxShadow(true);
+      });
+
+      /* --- text-shadow --- */
+      const tsDemo = document.getElementById("ts-demo");
+      const tsLayers = document.getElementById("ts-layers");
+      const tsAdd = document.getElementById("ts-add");
+      const tsReset = document.getElementById("ts-reset");
+      const tsPresets = document.getElementById("ts-presets");
+      const tsCode = document.getElementById("ts-code");
+
+      const TS_PRESETS = {
+        soft: [{ x: 0, y: 2, blur: 6, color: "27 16 53", a: 0.35 }],
+        neon: [
+          { x: 0, y: 0, blur: 6, color: "124 58 237", a: 0.9 },
+          { x: 0, y: 0, blur: 18, color: "124 58 237", a: 0.7 },
+          { x: 0, y: 0, blur: 38, color: "124 58 237", a: 0.45 },
+        ],
+        "3d": [
+          { x: 1, y: 1, blur: 0, color: "124 58 237", a: 0.9 },
+          { x: 2, y: 2, blur: 0, color: "124 58 237", a: 0.8 },
+          { x: 3, y: 3, blur: 0, color: "124 58 237", a: 0.7 },
+          { x: 4, y: 4, blur: 0, color: "27 16 53", a: 0.6 },
+        ],
+        outline: [
+          { x: -2, y: -2, blur: 0, color: "124 58 237", a: 1 },
+          { x: 2, y: -2, blur: 0, color: "124 58 237", a: 1 },
+          { x: -2, y: 2, blur: 0, color: "124 58 237", a: 1 },
+          { x: 2, y: 2, blur: 0, color: "124 58 237", a: 1 },
+        ],
+      };
+
+      let tsState = TS_PRESETS.soft.map((l) => ({ ...l }));
+
+      function tsLayerRow(layer, index) {
+        const el = document.createElement("div");
+        el.className = "layer";
+        el.dataset.index = String(index);
+        el.innerHTML = `
+          <div class="layer__head">
+            <b>слой ${index + 1}</b>
+            <button class="layer__del" type="button">удалить</button>
+          </div>
+          <div class="row row--three">
+            <label>x, px <input type="number" data-k="x" value="${layer.x}" step="1" /></label>
+            <label>y, px <input type="number" data-k="y" value="${layer.y}" step="1" /></label>
+            <label>blur, px <input type="number" data-k="blur" min="0" value="${layer.blur}" step="1" /></label>
+          </div>
+          <div class="row row--two">
+            <label>цвет <select data-k="color">${colorOptions(layer.color)}</select></label>
+            <label>alpha <input type="number" data-k="a" min="0.05" max="1" step="0.05" value="${layer.a}" /></label>
+          </div>`;
+        el.addEventListener("input", () => {
+          const i = Number(el.dataset.index);
+          el.querySelectorAll("[data-k]").forEach((inp) => {
+            const k = inp.dataset.k;
+            tsState[i][k] = k === "color" ? inp.value : num(inp.value, 0);
+          });
+          renderTextShadow();
+        });
+        el.querySelector(".layer__del").addEventListener("click", () => {
+          if (tsState.length <= 1) return;
+          tsState.splice(Number(el.dataset.index), 1);
+          renderTextShadow(true);
+        });
+        return el;
+      }
+
+      function tsValueOf(layer) {
+        const a = Math.min(1, Math.max(0.05, layer.a));
+        const format = document.getElementById("ts-format").value;
+        return `${layer.x}px ${layer.y}px ${Math.max(0, layer.blur)}px ${formatColor(layer.color, a, format)}`;
+      }
+
+      function renderTextShadow(rebuild) {
+        if (rebuild) {
+          tsLayers.replaceChildren(...tsState.map(tsLayerRow));
+        }
+        const value = tsState.map(tsValueOf).join(",\n    ");
+        tsDemo.style.textShadow = tsState.map(tsValueOf).join(", ");
+        tsCode.textContent = `.text {\n  text-shadow:\n    ${value};\n}`;
+      }
+
+      tsAdd.addEventListener("click", () => {
+        const last = tsState[tsState.length - 1] || { x: 0, y: 2, blur: 6, color: "27 16 53", a: 0.35 };
+        tsState.push({ ...last, blur: Math.max(0, last.blur + 8), a: Math.max(0.05, last.a - 0.1) });
+        renderTextShadow(true);
+      });
+
+      tsReset.addEventListener("click", () => {
+        tsState = TS_PRESETS.soft.map((l) => ({ ...l }));
+        renderTextShadow(true);
+      });
+
+      tsPresets.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const preset = TS_PRESETS[btn.dataset.ts];
+        if (!preset) return;
+        tsState = preset.map((l) => ({ ...l }));
+        renderTextShadow(true);
+      });
+
+      document.getElementById("bs-format").addEventListener("change", () => renderBoxShadow());
+      document.getElementById("ts-format").addEventListener("change", () => renderTextShadow());
+
+      renderBoxShadow(true);
+      renderTextShadow(true);
+
+      /* ---------- filter ---------- */
+      const flBox = document.getElementById("fl-box");
+      const flBlur = document.getElementById("fl-blur");
+      const flBright = document.getElementById("fl-bright");
+      const flContrast = document.getElementById("fl-contrast");
+      const flSat = document.getElementById("fl-sat");
+      const flGray = document.getElementById("fl-gray");
+      const flSepia = document.getElementById("fl-sepia");
+      const flHue = document.getElementById("fl-hue");
+      const flInvert = document.getElementById("fl-invert");
+      const flOp = document.getElementById("fl-op");
+      const flPresets = document.getElementById("fl-presets");
+      const flShadowOn = document.getElementById("fl-shadow-on");
+      const flShX = document.getElementById("fl-sh-x");
+      const flShY = document.getElementById("fl-sh-y");
+      const flShBlur = document.getElementById("fl-sh-blur");
+      const flShColor = document.getElementById("fl-sh-color");
+      const flUrl = document.getElementById("fl-url");
+      const flCode = document.getElementById("fl-code");
+
+      const FL_FIELDS = {
+        blur: flBlur, bright: flBright, contrast: flContrast, sat: flSat,
+        gray: flGray, sepia: flSepia, hue: flHue, invert: flInvert, op: flOp,
+      };
+      const FL_NEUTRAL = { blur: 0, bright: 1, contrast: 1, sat: 1, gray: 0, sepia: 0, hue: 0, invert: 0, op: 1 };
+
+      function flState() {
+        const s = {};
+        Object.keys(FL_FIELDS).forEach((k) => {
+          const n = Number(FL_FIELDS[k].value);
+          s[k] = Number.isFinite(n) ? n : FL_NEUTRAL[k];
+        });
+        return s;
+      }
+
+      function flChain(s) {
+        const parts = [];
+        if (s.blur > 0) parts.push(`blur(${s.blur}px)`);
+        if (s.bright !== 1) parts.push(`brightness(${s.bright})`);
+        if (s.contrast !== 1) parts.push(`contrast(${s.contrast})`);
+        if (s.sat !== 1) parts.push(`saturate(${s.sat})`);
+        if (s.gray > 0) parts.push(`grayscale(${s.gray})`);
+        if (s.sepia > 0) parts.push(`sepia(${s.sepia})`);
+        if (s.hue !== 0) parts.push(`hue-rotate(${s.hue}deg)`);
+        if (s.invert > 0) parts.push(`invert(${s.invert})`);
+        if (s.op < 1) parts.push(`opacity(${s.op})`);
+        if (flShadowOn.checked) {
+          const x = Number(flShX.value) || 0;
+          const y = Number(flShY.value) || 0;
+          const blur = Math.max(0, Number(flShBlur.value) || 0);
+          parts.push(`drop-shadow(${x}px ${y}px ${blur}px ${flShColor.value})`);
+        }
+        if (flUrl.value) parts.push(`url(#${flUrl.value})`);
+        return parts;
+      }
+
+      function renderFilter() {
+        const parts = flChain(flState());
+        const value = parts.length ? parts.join(" ") : "none";
+        flBox.style.filter = value;
+        flCode.textContent = `.element {\n  filter: ${value};\n}`;
+      }
+
+      Object.values(FL_FIELDS).forEach((el) => el.addEventListener("input", renderFilter));
+      [flShadowOn, flShX, flShY, flShBlur, flShColor, flUrl].forEach((el) =>
+        el.addEventListener("input", renderFilter),
+      );
+
+      const FL_PRESETS = {
+        photo:   { blur: 0, bright: 1.08, contrast: 1.06, sat: 1.15, gray: 0, sepia: 0, hue: 0, invert: 0, op: 1 },
+        mono:    { blur: 0, bright: 1, contrast: 1, sat: 1, gray: 1, sepia: 0, hue: 0, invert: 0, op: 1 },
+        vintage: { blur: 0, bright: 1, contrast: 1.1, sat: 1, gray: 0, sepia: 0.7, hue: -10, invert: 0, op: 1 },
+        turn:    { blur: 0, bright: 1, contrast: 1, sat: 1, gray: 0, sepia: 0, hue: 90, invert: 0, op: 1 },
+        invert:  { blur: 0, bright: 1, contrast: 1, sat: 1, gray: 0, sepia: 0, hue: 0, invert: 1, op: 1 },
+        soft:    { blur: 4, bright: 1, contrast: 1, sat: 1, gray: 0, sepia: 0, hue: 0, invert: 0, op: 1 },
+        reset:   { ...FL_NEUTRAL },
+      };
+
+      flPresets.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const preset = FL_PRESETS[btn.dataset.fl];
+        if (!preset) return;
+        Object.entries(preset).forEach(([k, v]) => { FL_FIELDS[k].value = v; });
+        renderFilter();
+      });
+
+      renderFilter();
+
+      /* ---------- backdrop-filter ---------- */
+      const bfGlass = document.getElementById("bf-glass");
+      const bfBlur = document.getElementById("bf-blur");
+      const bfSat = document.getElementById("bf-sat");
+      const bfBright = document.getElementById("bf-bright");
+      const bfPresets = document.getElementById("bf-presets");
+      const bfCode = document.getElementById("bf-code");
+
+      function renderBackdrop() {
+        const parts = [];
+        const blur = Number(bfBlur.value) || 0;
+        const sat = Number(bfSat.value);
+        const bright = Number(bfBright.value);
+        if (blur > 0) parts.push(`blur(${blur}px)`);
+        if (sat !== 1) parts.push(`saturate(${sat})`);
+        if (bright !== 1) parts.push(`brightness(${bright})`);
+        const value = parts.length ? parts.join(" ") : "none";
+        bfGlass.style.backdropFilter = value;
+        bfCode.textContent = `.glass {\n  background: rgb(255 255 255 / .10);\n  backdrop-filter: ${value};\n}`;
+      }
+
+      [bfBlur, bfSat, bfBright].forEach((el) => el.addEventListener("input", renderBackdrop));
+
+      bfPresets.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+        const k = btn.dataset.bf;
+        if (k === "glass") { bfBlur.value = 8; bfSat.value = 1.4; bfBright.value = 1; }
+        if (k === "frost") { bfBlur.value = 16; bfSat.value = 1.8; bfBright.value = 1.1; }
+        if (k === "clear") { bfBlur.value = 0; bfSat.value = 1; bfBright.value = 1; }
+        renderBackdrop();
+      });
+
+      renderBackdrop();
+
+      /* ---------- clip-path ---------- */
+      const clipBox = document.getElementById("clip-box");
+      const clipShape = document.getElementById("clip-shape");
+      const clipCustom = document.getElementById("clip-custom");
+      const clipCode = document.getElementById("clip-code");
+
+      const CLIP_SHAPES = {
+        circle: "circle(45%)",
+        ellipse: "ellipse(45% 35%)",
+        inset: "inset(10% round 16px)",
+        triangle: "polygon(50% 0%, 100% 100%, 0% 100%)",
+        hex: "polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%)",
+        star: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
+      };
+
+      function clipValue() {
+        const custom = clipCustom.value.trim();
+        if (custom) return custom;
+        return CLIP_SHAPES[clipShape.value] || "none";
+      }
+
+      function renderClip() {
+        const value = clipValue();
+        clipBox.style.clipPath = value;
+        clipCode.textContent = `.element {\n  clip-path: ${value};\n}`;
+      }
+
+      clipShape.addEventListener("change", () => { clipCustom.value = ""; renderClip(); });
+      clipCustom.addEventListener("input", renderClip);
+      renderClip();
+
+      /* ---------- цвет: rgb / hex / hsl ---------- */
+      const PALETTE = [
+        "#7c3aed", "#a78bfa", "#4c1d95", "#1b1035", "#f472b6", "#fbbf24",
+        "#34d399", "#0ea5e9", "#ef4444", "#ffffff", "#9b94ad", "#000000",
+      ];
+
+      const rgbEls = { r: document.getElementById("rgb-r"), g: document.getElementById("rgb-g"), b: document.getElementById("rgb-b") };
+      const rgbOuts = { r: document.getElementById("rgb-r-out"), g: document.getElementById("rgb-g-out"), b: document.getElementById("rgb-b-out") };
+      const rgbA = document.getElementById("rgb-a");
+      const rgbAOut = document.getElementById("rgb-a-out");
+      const hslEls = { h: document.getElementById("hsl-h"), s: document.getElementById("hsl-s"), l: document.getElementById("hsl-l") };
+      const hslOuts = { h: document.getElementById("hsl-h-out"), s: document.getElementById("hsl-s-out"), l: document.getElementById("hsl-l-out") };
+      const hexInput = document.getElementById("hex-input");
+      const hexAlpha = document.getElementById("hex-alpha");
+      const hexPalette = document.getElementById("hex-palette");
+
+      const els = {
+        swatches: [document.getElementById("rgb-swatch"), document.getElementById("hex-swatch"), document.getElementById("hsl-swatch")],
+        values: [document.getElementById("rgb-value"), document.getElementById("hex-value"), document.getElementById("hsl-value")],
+        formats: [document.getElementById("rgb-formats"), document.getElementById("hex-formats"), document.getElementById("hsl-formats")],
+        codes: [document.getElementById("rgb-code"), document.getElementById("hex-code"), document.getElementById("hsl-code")],
+      };
+
+      let COLOR = { r: 124, g: 58, b: 237, a: 1 };
+
+      function clamp(n, min, max, fallback) {
+        const v = Number(n);
+        return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback;
+      }
+
+      function componentToHex(c) {
+        return c.toString(16).padStart(2, "0");
+      }
+
+      function rgbToHex({ r, g, b }) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+      }
+
+      function hexToRgb(hex) {
+        let s = String(hex).trim().replace(/^#/, "");
+        if (s.length === 3) s = s.split("").map((ch) => ch + ch).join("");
+        if (!/^[0-9a-f]{6}$/i.test(s)) return null;
+        return {
+          r: parseInt(s.slice(0, 2), 16),
+          g: parseInt(s.slice(2, 4), 16),
+          b: parseInt(s.slice(4, 6), 16),
+        };
+      }
+
+      function rgbToHsl({ r, g, b }) {
+        const rn = r / 255, gn = g / 255, bn = b / 255;
+        const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+        const l = (max + min) / 2;
+        let h = 0, s = 0;
+        if (max !== min) {
+          const d = max - min;
+          s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+          if (max === rn) h = ((gn - bn) / d + (gn < bn ? 6 : 0)) / 6;
+          else if (max === gn) h = ((bn - rn) / d + 2) / 6;
+          else h = ((rn - gn) / d + 4) / 6;
+        }
+        return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+      }
+
+      function hslToRgb(h, s, l) {
+        const sn = s / 100, ln = l / 100;
+        const c = (1 - Math.abs(2 * ln - 1)) * sn;
+        const hp = (h % 360) / 60;
+        const x = c * (1 - Math.abs((hp % 2) - 1));
+        let r1 = 0, g1 = 0, b1 = 0;
+        if (hp < 1) [r1, g1, b1] = [c, x, 0];
+        else if (hp < 2) [r1, g1, b1] = [x, c, 0];
+        else if (hp < 3) [r1, g1, b1] = [0, c, x];
+        else if (hp < 4) [r1, g1, b1] = [0, x, c];
+        else if (hp < 5) [r1, g1, b1] = [x, 0, c];
+        else [r1, g1, b1] = [c, 0, x];
+        const m = ln - c / 2;
+        return {
+          r: Math.round((r1 + m) * 255),
+          g: Math.round((g1 + m) * 255),
+          b: Math.round((b1 + m) * 255),
+        };
+      }
+
+      function cssRgb(c) {
+        const a = Math.round(c.a * 100) / 100;
+        return c.a >= 1 ? `rgb(${c.r} ${c.g} ${c.b})` : `rgb(${c.r} ${c.g} ${c.b} / ${a})`;
+      }
+
+      function cssHsl(c) {
+        const { h, s, l } = rgbToHsl(c);
+        const a = Math.round(c.a * 100) / 100;
+        return c.a >= 1 ? `hsl(${h} ${s}% ${l}%)` : `hsl(${h} ${s}% ${l}% / ${a})`;
+      }
+
+      function cssHex(c) {
+        const base = rgbToHex(c);
+        if (c.a >= 1) return base;
+        return base + componentToHex(Math.round(c.a * 255));
+      }
+
+      function paintColor() {
+        const hex = rgbToHex(COLOR);
+        const hsl = rgbToHsl(COLOR);
+        const alpha = Math.round(COLOR.a * 100) / 100;
+
+        els.swatches.forEach((sw) => {
+          sw.style.background = cssRgb(COLOR);
+        });
+        els.values[0].textContent = cssRgb(COLOR);
+        els.values[1].textContent = cssHex(COLOR);
+        els.values[2].textContent = cssHsl(COLOR);
+
+        const allFormats = `rgb: ${cssRgb(COLOR)} · hex: ${cssHex(COLOR)} · hsl: ${cssHsl(COLOR)}`;
+        els.formats.forEach((p) => { p.textContent = allFormats; });
+
+        els.codes[0].textContent = `.element {\n  color: ${cssRgb(COLOR)};\n}`;
+        els.codes[1].textContent = `.element {\n  color: ${cssHex(COLOR)};\n}`;
+        els.codes[2].textContent = `.element {\n  color: ${cssHsl(COLOR)};\n}`;
+
+        Object.entries(rgbEls).forEach(([k, el]) => { el.value = COLOR[k]; });
+        Object.entries(rgbOuts).forEach(([k, el]) => { el.textContent = COLOR[k]; });
+        Object.entries(hslEls).forEach(([k, el]) => { el.value = hsl[k]; });
+        Object.entries(hslOuts).forEach(([k, el]) => { el.textContent = hsl[k]; });
+        hexInput.value = hex;
+        hexAlpha.value = Math.round(alpha * 100);
+        rgbA.value = Math.round(alpha * 100);
+        rgbAOut.textContent = Math.round(alpha * 100);
+      }
+
+      function setColor(next) {
+        COLOR = {
+          r: clamp(next.r, 0, 255, COLOR.r),
+          g: clamp(next.g, 0, 255, COLOR.g),
+          b: clamp(next.b, 0, 255, COLOR.b),
+          a: clamp(next.a === undefined ? COLOR.a : next.a, 0, 1, COLOR.a),
+        };
+        paintColor();
+      }
+
+      hexPalette.replaceChildren(...PALETTE.map((hex) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "swatch-btn";
+        b.style.background = hex;
+        b.title = hex;
+        b.addEventListener("click", () => { const rgb = hexToRgb(hex); if (rgb) setColor({ ...rgb }); });
+        return b;
+      }));
+
+      Object.entries(rgbEls).forEach(([k, el]) => {
+        el.addEventListener("input", () => setColor({ ...COLOR, [k]: Number(el.value) }));
+      });
+
+      rgbA.addEventListener("input", () => setColor({ ...COLOR, a: Number(rgbA.value) / 100 }));
+
+      Object.entries(hslEls).forEach(([k, el]) => {
+        el.addEventListener("input", () => {
+          const h = Number(hslEls.h.value), s = Number(hslEls.s.value), l = Number(hslEls.l.value);
+          setColor({ ...hslToRgb(h, s, l) });
+        });
+      });
+
+      hexInput.addEventListener("input", () => {
+        const rgb = hexToRgb(hexInput.value);
+        if (rgb) setColor({ ...rgb, a: COLOR.a });
+      });
+
+      hexAlpha.addEventListener("input", () => setColor({ ...COLOR, a: Number(hexAlpha.value) / 100 }));
+
+      paintColor();
+
+      /* ---------- градиенты ---------- */
+      const radialCenter = { x: 50, y: 50 };
+      const conicCenter = { x: 50, y: 50 };
+
+      function dragPad(pad, handler) {
+        let active = false;
+        const move = (event) => {
+          const rect = pad.getBoundingClientRect();
+          const x = ((event.clientX - rect.left) / rect.width) * 100;
+          const y = ((event.clientY - rect.top) / rect.height) * 100;
+          handler(clamp(x, 0, 100, 50), clamp(y, 0, 100, 50));
+        };
+        pad.addEventListener("pointerdown", (event) => {
+          active = true;
+          try { pad.setPointerCapture(event.pointerId); } catch (error) { /* синтетические события */ }
+          move(event);
+        });
+        pad.addEventListener("pointermove", (event) => { if (active) move(event); });
+        pad.addEventListener("pointerup", () => { active = false; });
+        pad.addEventListener("pointercancel", () => { active = false; });
+      }
+
+      function stopString(stops) {
+        return stops
+          .map((stop) => (stop.p === "" || stop.p === null ? stop.c : `${stop.c} ${stop.p}%`))
+          .join(", ");
+      }
+
+      function buildStops(container, stops, onChange) {
+        container.replaceChildren(...stops.map((stop, index) => {
+          const row = document.createElement("div");
+          row.className = "stop-row";
+          row.innerHTML = `
+            <input type="color" value="${stop.c}" aria-label="Цвет ${index + 1}" />
+            <input type="number" min="0" max="100" step="5" placeholder="авто" value="${stop.p}" aria-label="Позиция ${index + 1}, %" />
+            <button class="stop-del" type="button" title="Удалить цвет">×</button>`;
+          const [color, pos] = row.querySelectorAll("input");
+          color.addEventListener("input", () => { stop.c = color.value; onChange(); });
+          pos.addEventListener("input", () => { stop.p = pos.value === "" ? "" : clamp(pos.value, 0, 100, 0); onChange(); });
+          row.querySelector(".stop-del").addEventListener("click", () => {
+            if (stops.length <= 2) return;
+            stops.splice(index, 1);
+            buildStops(container, stops, onChange);
+            onChange();
+          });
+          return row;
+        }));
+      }
+
+      function addStop(stops, container, onChange) {
+        const last = stops[stops.length - 1] || { c: "#7c3aed" };
+        stops.push({ c: last.c, p: "" });
+        buildStops(container, stops, onChange);
+        onChange();
+      }
+
+      /* линейный */
+      const lgStage = document.getElementById("lg-stage");
+      const lgDot = document.getElementById("lg-dot");
+      const lgTo = document.getElementById("lg-to");
+      const lgAngle = document.getElementById("lg-angle");
+      const lgStopsEl = document.getElementById("lg-stops");
+      const lgCode = document.getElementById("lg-code");
+      let lgStops = [
+        { c: "#7c3aed", p: "" },
+        { c: "#f472b6", p: "" },
+        { c: "#fbbf24", p: "" },
+      ];
+      const TO_ANGLE = {
+        "to top": 0, "to top right": 45, "to right": 90, "to bottom right": 135,
+        "to bottom": 180, "to bottom left": 225, "to left": 270, "to top left": 315,
+      };
+
+      function renderLinear() {
+        const angle = Number(lgAngle.value) || 0;
+        const keyword = TO_ANGLE[lgTo.value];
+        const dir = keyword !== undefined ? lgTo.value : `${angle}deg`;
+        const fn = document.getElementById("lg-repeat").checked ? "repeating-linear-gradient" : "linear-gradient";
+        const value = `${fn}(${dir}, ${stopString(lgStops)})`;
+        lgStage.style.backgroundImage = value;
+        lgCode.textContent = `.gradient {\n  background-image: ${value};\n}`;
+
+        const rad = ((angle - 90) * Math.PI) / 180;
+        lgDot.style.left = 50 + Math.cos(rad) * 40 + "%";
+        lgDot.style.top = 50 + Math.sin(rad) * 40 + "%";
+      }
+
+      lgAngle.addEventListener("input", () => {
+        const value = Number(lgAngle.value);
+        const match = Object.entries(TO_ANGLE).find(([, deg]) => deg === value);
+        lgTo.value = match ? match[0] : "angle";
+        renderLinear();
+      });
+      lgTo.addEventListener("change", () => {
+        const a = TO_ANGLE[lgTo.value];
+        if (a !== undefined) lgAngle.value = a;
+        renderLinear();
+      });
+      document.getElementById("lg-add").addEventListener("click", () => addStop(lgStops, lgStopsEl, renderLinear));
+      document.getElementById("lg-repeat").addEventListener("change", renderLinear);
+      document.getElementById("lg-default").addEventListener("click", () => {
+        lgStops = [{ c: "#7c3aed", p: "" }, { c: "#f472b6", p: "" }, { c: "#fbbf24", p: "" }];
+        buildStops(lgStopsEl, lgStops, renderLinear);
+        renderLinear();
+      });
+
+      let lgDrag = false;
+      function linearDrag(event) {
+        const rect = lgStage.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        const deg = (Math.atan2(event.clientY - cy, event.clientX - cx) * 180) / Math.PI + 90;
+        lgAngle.value = Math.round((deg + 360) % 360);
+        lgTo.value = "angle";
+        renderLinear();
+      }
+      lgStage.addEventListener("pointerdown", (event) => {
+        lgDrag = true;
+        try { lgStage.setPointerCapture(event.pointerId); } catch (error) { /* синтетические события */ }
+        linearDrag(event);
+      });
+      lgStage.addEventListener("pointermove", (event) => { if (lgDrag) linearDrag(event); });
+      lgStage.addEventListener("pointerup", () => { lgDrag = false; });
+      lgStage.addEventListener("pointercancel", () => { lgDrag = false; });
+
+      /* радиальный */
+      const rgStage = document.getElementById("rg-stage");
+      const rgDot = document.getElementById("rg-dot");
+      const rgShape = document.getElementById("rg-shape");
+      const rgSize = document.getElementById("rg-size");
+      const rgAt = document.getElementById("rg-at");
+      const rgStopsEl = document.getElementById("rg-stops");
+      const rgCode = document.getElementById("rg-code");
+      let rgStops = [
+        { c: "#4c1d95", p: "" },
+        { c: "#7c3aed", p: "" },
+        { c: "#f472b6", p: "" },
+      ];
+
+      function renderRadial() {
+        const at = `${Math.round(radialCenter.x)}% ${Math.round(radialCenter.y)}%`;
+        rgAt.textContent = at;
+        rgDot.style.left = radialCenter.x + "%";
+        rgDot.style.top = radialCenter.y + "%";
+        const fn = document.getElementById("rg-repeat").checked ? "repeating-radial-gradient" : "radial-gradient";
+        const value = `${fn}(${rgShape.value} ${rgSize.value} at ${at}, ${stopString(rgStops)})`;
+        rgStage.style.backgroundImage = value;
+        rgCode.textContent = `.gradient {\n  background-image: ${value};\n}`;
+      }
+
+      dragPad(rgStage, (x, y) => { radialCenter.x = Math.round(x); radialCenter.y = Math.round(y); renderRadial(); });
+      rgShape.addEventListener("change", renderRadial);
+      rgSize.addEventListener("change", renderRadial);
+      document.getElementById("rg-add").addEventListener("click", () => addStop(rgStops, rgStopsEl, renderRadial));
+      document.getElementById("rg-repeat").addEventListener("change", renderRadial);
+      document.getElementById("rg-default").addEventListener("click", () => {
+        rgStops = [{ c: "#4c1d95", p: "" }, { c: "#7c3aed", p: "" }, { c: "#f472b6", p: "" }];
+        buildStops(rgStopsEl, rgStops, renderRadial);
+        renderRadial();
+      });
+
+      /* конический */
+      const cgStage = document.getElementById("cg-stage");
+      const cgDot = document.getElementById("cg-dot");
+      const cgFrom = document.getElementById("cg-from");
+      const cgFromOut = document.getElementById("cg-from-out");
+      const cgStopsEl = document.getElementById("cg-stops");
+      const cgCode = document.getElementById("cg-code");
+      let cgStops = [
+        { c: "#ffc802", p: 0 },
+        { c: "#6dc1fd", p: 50 },
+        { c: "#80d994", p: 100 },
+      ];
+
+      function renderConic() {
+        const at = `${Math.round(conicCenter.x)}% ${Math.round(conicCenter.y)}%`;
+        cgDot.style.left = conicCenter.x + "%";
+        cgDot.style.top = conicCenter.y + "%";
+        cgFromOut.textContent = cgFrom.value;
+        const fn = document.getElementById("cg-repeat").checked ? "repeating-conic-gradient" : "conic-gradient";
+        const value = `${fn}(from ${cgFrom.value}deg at ${at}, ${stopString(cgStops)})`;
+        cgStage.style.backgroundImage = value;
+        cgCode.textContent = `.gradient {\n  background-image: ${value};\n}`;
+      }
+
+      dragPad(cgStage, (x, y) => { conicCenter.x = Math.round(x); conicCenter.y = Math.round(y); renderConic(); });
+      cgFrom.addEventListener("input", renderConic);
+      document.getElementById("cg-add").addEventListener("click", () => addStop(cgStops, cgStopsEl, renderConic));
+      document.getElementById("cg-repeat").addEventListener("change", renderConic);
+      document.getElementById("cg-default").addEventListener("click", () => {
+        cgStops = [{ c: "#ffc802", p: 0 }, { c: "#6dc1fd", p: 50 }, { c: "#80d994", p: 100 }];
+        buildStops(cgStopsEl, cgStops, renderConic);
+        renderConic();
+      });
+
+      buildStops(lgStopsEl, lgStops, renderLinear);
+      buildStops(rgStopsEl, rgStops, renderRadial);
+      buildStops(cgStopsEl, cgStops, renderConic);
+      renderLinear();
+      renderRadial();
+      renderConic();
+
+      /* ---------- анимация цвета ---------- */
+      const caBox = document.getElementById("ca-box");
+      const caMode = document.getElementById("ca-mode");
+      const caDur = document.getElementById("ca-dur");
+      const caIter = document.getElementById("ca-iter");
+      const caEase = document.getElementById("ca-ease");
+      const caDir = document.getElementById("ca-dir");
+      const caStopsEl = document.getElementById("ca-stops");
+      const caCode = document.getElementById("ca-code");
+      const caStyle = document.createElement("style");
+      caStyle.id = "ca-keyframes";
+      document.head.append(caStyle);
+
+      let caColors = ["#7c3aed", "#f472b6", "#fbbf24"];
+
+      function caBuildRows() {
+        caStopsEl.replaceChildren(...caColors.map((color, index) => {
+          const row = document.createElement("div");
+          row.className = "stop-row";
+          row.innerHTML = `
+            <input type="color" value="${color}" aria-label="Цвет ${index + 1}" />
+            <input type="text" value="${color}" aria-label="HEX ${index + 1}" />
+            <button class="stop-del" type="button" title="Удалить цвет">×</button>`;
+          const [picker, text] = row.querySelectorAll("input");
+          const apply = (value) => {
+            caColors[index] = value;
+            picker.value = value;
+            text.value = value;
+            renderColorAnimation();
+          };
+          picker.addEventListener("input", () => apply(picker.value));
+          text.addEventListener("input", () => {
+            if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(text.value.trim())) apply(text.value.trim());
+          });
+          row.querySelector(".stop-del").addEventListener("click", () => {
+            if (caColors.length <= 2) return;
+            caColors.splice(index, 1);
+            caBuildRows();
+            renderColorAnimation();
+          });
+          return row;
+        }));
+      }
+
+      function caFrames(prop) {
+        const total = caColors.length;
+        return caColors.map((color, index) => {
+          const percent = Math.round((index / total) * 100);
+          return `  ${percent}% { ${prop}: ${color}; }`;
+        }).concat([`  100% { ${prop}: ${caColors[0]}; }`]).join("\n");
+      }
+
+      const CA_HINTS = {
+        bg: "цвет плавно переходит между кадрами",
+        text: "меняется color: следите за контрастом на каждом кадре",
+        gradient: "широкий градиент двигается через background-position",
+        angle: "угол меняется только с @property; в браузерах без поддержки он сменится мгновенно — оставьте запасной фон",
+        hue: "переменная-число --hue управляет hsl(); без @property значение прыгает",
+      };
+
+      function renderColorAnimation() {
+        const mode = caMode.value;
+        const hintEl = document.getElementById("ca-hint");
+        if (hintEl) hintEl.textContent = CA_HINTS[mode] || "";
+        const duration = Math.max(0.5, Number(caDur.value) || 4);
+        const ease = caEase.value;
+        const dir = caDir.value;
+        const iter = caIter.value;
+
+        caBox.style.cssText = "";
+        caBox.style.backgroundImage = "";
+        caBox.style.animation = "";
+        caBox.classList.toggle("ca-demo--text", mode === "text");
+
+        let frames = "";
+        let selector = ".element";
+        let body = "";
+
+        if (mode === "hue") {
+          caBox.style.backgroundImage = "";
+          caBox.style.backgroundSize = "auto";
+          caBox.style.backgroundPosition = "0 0";
+          caStyle.textContent = `@property --ca-hue {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 262;
+}
+
+@keyframes ca-hue {
+  from { --ca-hue: 262; }
+  to   { --ca-hue: 32; }
+}`;
+          caBox.style.backgroundColor = "hsl(var(--ca-hue) 83% 58%)";
+          caBox.style.animation = `ca-hue ${duration}s ${ease} ${iter} ${dir}`;
+          caCode.textContent = `@property --ca-hue {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 262;
+}
+
+@keyframes ca-hue {
+  from { --ca-hue: 262; }
+  to   { --ca-hue: 32; }
+}
+
+.element {
+  background-color: hsl(var(--ca-hue) 83% 58%);
+  animation: ca-hue ${duration}s ${ease} ${iter} ${dir};
+}`;
+          return;
+        }
+
+        if (mode === "angle") {
+          const unique = caColors.filter((color, index) => color !== caColors[index - 1]);
+          const gradient = `linear-gradient(var(--ca-angle), ${[...unique, caColors[0]].join(", ")})`;
+          caBox.style.backgroundImage = gradient;
+          caBox.style.backgroundSize = "auto";
+          caBox.style.backgroundPosition = "0 0";
+          caStyle.textContent = `@property --ca-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes ca-angle {
+  from { --ca-angle: 0deg; }
+  to { --ca-angle: 360deg; }
+}`;
+          caBox.style.animation = `ca-angle ${duration}s ${ease} ${iter} ${dir}`;
+          caCode.textContent = `@property --ca-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes ca-angle {
+  from { --ca-angle: 0deg; }
+  to { --ca-angle: 360deg; }
+}
+
+.element {
+  background-image: ${gradient};
+  animation: ca-angle ${duration}s ${ease} ${iter} ${dir};
+}`;
+          return;
+        }
+
+        if (mode === "gradient") {
+          const unique = caColors.filter((color, index) => color !== caColors[index - 1]);
+          const gradient = `linear-gradient(90deg, ${[...unique, caColors[0]].join(", ")})`;
+          caBox.style.backgroundImage = gradient;
+          caBox.style.backgroundSize = "200% 100%";
+          frames = `  0% { background-position: 0% 50%; }\n  100% { background-position: 100% 50%; }`;
+          body = `  background-image: ${gradient};\n  background-size: 200% 100%;\n  animation: ca-cycle ${duration}s ${ease} ${iter} ${dir};`;
+        } else if (mode === "text") {
+          caBox.style.color = caColors[0];
+          frames = caFrames("color");
+          body = `  color: ${caColors[0]};\n  animation: ca-cycle ${duration}s ${ease} ${iter} ${dir};`;
+        } else {
+          caBox.style.backgroundColor = caColors[0];
+          frames = caFrames("background-color");
+          body = `  background-color: ${caColors[0]};\n  animation: ca-cycle ${duration}s ${ease} ${iter} ${dir};`;
+        }
+
+        caStyle.textContent = `@keyframes ca-cycle {\n${frames}\n}`;
+        caBox.style.animation = `ca-cycle ${duration}s ${ease} ${iter} ${dir}`;
+
+        caCode.textContent = `@keyframes ca-cycle {\n${frames}\n}\n\n${selector} {\n${body}\n}`;
+      }
+
+      caMode.addEventListener("change", renderColorAnimation);
+      [caDur, caIter, caEase, caDir].forEach((el) => el.addEventListener("change", renderColorAnimation));
+      caDur.addEventListener("input", renderColorAnimation);
+
+      document.getElementById("ca-add").addEventListener("click", () => {
+        caColors.push(caColors[caColors.length - 1] || "#7c3aed");
+        caBuildRows();
+        renderColorAnimation();
+      });
+
+      document.getElementById("ca-default").addEventListener("click", () => {
+        caColors = ["#7c3aed", "#f472b6", "#fbbf24"];
+        caBuildRows();
+        renderColorAnimation();
+      });
+
+      caBuildRows();
+      renderColorAnimation();
+
+      /* ---------- mix-blend-mode ---------- */
+      const mbStage = document.getElementById("mb-stage");
+      const mbBase = document.getElementById("mb-base");
+      const mbIsolate = document.getElementById("mb-isolate");
+      const mbOp = document.getElementById("mb-op");
+      const mbLayersEl = document.getElementById("mb-layers");
+      const mbBg = document.getElementById("mb-bg");
+      const mbImgUrl = document.getElementById("mb-img-url");
+      const mbImgFile = document.getElementById("mb-img-file");
+      const mbImgReset = document.getElementById("mb-img-reset");
+
+      let mbImage = { preview: "", code: "" };
+
+      const sampleImage = (kind) => {
+        const palettes = {
+          landscape: ["#0b1020", "#1d4ed8", "#22d3ee", "#fbbf24"],
+          portrait: ["#1b1035", "#7c3aed", "#f472b6", "#fde68a"],
+          texture: ["#0f172a", "#334155", "#94a3b8", "#e2e8f0"],
+        };
+        const [sky, mid, accent, light] = palettes[kind] || palettes.landscape;
+        const shapes = kind === "portrait"
+          ? `<circle cx="400" cy="200" r="110" fill="${light}"/><path d="M230 520c0-95 76-170 170-170s170 75 170 170z" fill="${accent}"/>`
+          : kind === "texture"
+            ? `<g opacity="0.9">${Array.from({ length: 14 }, (_, i) => `<rect x="${i * 60}" y="0" width="26" height="520" fill="${i % 2 ? accent : mid}" opacity="${0.25 + (i % 3) * 0.2}"/>`).join("")}</g>`
+            : `<circle cx="600" cy="150" r="80" fill="${accent}"/><path d="M0 380c120-90 260-90 400 0s280 90 400 0v140H0z" fill="${mid}"/><path d="M0 450c140-70 280-70 420 0s260 70 380 0v70H0z" fill="${accent}" opacity="0.85"/>`;
+        return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520"><rect width="800" height="520" fill="${sky}"/>${shapes}</svg>`);
+      };
+      const mbAll = document.getElementById("mb-all");
+      const mbCode = document.getElementById("mb-code");
+
+      const MB_MODES = ["normal", "multiply", "screen", "overlay", "darken", "lighten",
+        "color-dodge", "color-burn", "hard-light", "soft-light", "difference",
+        "exclusion", "hue", "saturation", "color", "luminosity"];
+
+      const MB_DEFAULT = [
+        { kind: "shape", color: "#f472b6", mode: "multiply", x: 24, y: 30 },
+        { kind: "shape", color: "#38bdf8", mode: "screen", x: 76, y: 30 },
+        { kind: "shape", color: "#fbbf24", mode: "overlay", x: 50, y: 74 },
+        { kind: "text", color: "#ffffff", mode: "difference", x: 50, y: 50, text: "BLEND", size: 58 },
+      ];
+
+      let mbLayers = MB_DEFAULT.map((l) => ({ ...l }));
+
+      function mbClamp(v, min, max, fallback) {
+        const n = Number(v);
+        return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+      }
+
+      function mbMakeLayerEl(layer, index) {
+        const el = document.createElement("div");
+        el.dataset.index = String(index);
+        el.style.left = layer.x + "%";
+        el.style.top = layer.y + "%";
+        el.style.color = layer.color;
+
+        if (layer.kind === "text") {
+          el.className = "mb-text";
+          el.textContent = layer.text || "текст";
+          el.style.fontSize = (layer.size || 48) + "px";
+        } else {
+          el.className = "mb-shape";
+          el.style.background = layer.color;
+        }
+
+        el.style.mixBlendMode = layer.mode;
+
+        let active = false;
+        const move = (event) => {
+          const rect = mbStage.getBoundingClientRect();
+          layer.x = Math.round(mbClamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100, layer.x));
+          layer.y = Math.round(mbClamp(((event.clientY - rect.top) / rect.height) * 100, 0, 100, layer.y));
+          el.style.left = layer.x + "%";
+          el.style.top = layer.y + "%";
+          renderBlend();
+        };
+        el.addEventListener("pointerdown", (event) => {
+          active = true;
+          try { el.setPointerCapture(event.pointerId); } catch (error) { /* синтетические события */ }
+          move(event);
+        });
+        el.addEventListener("pointermove", (event) => { if (active) move(event); });
+        el.addEventListener("pointerup", () => { active = false; });
+        el.addEventListener("pointercancel", () => { active = false; });
+        return el;
+      }
+
+      function mbShapes() {
+        [...mbStage.querySelectorAll(".mb-shape, .mb-text")].forEach((el) => el.remove());
+        mbLayers.forEach((layer, index) => mbStage.append(mbMakeLayerEl(layer, index)));
+      }
+
+      function mbRows() {
+        mbLayersEl.replaceChildren(...mbLayers.map((layer, index) => {
+          const row = document.createElement("div");
+          row.className = "mb-row";
+          const isText = layer.kind === "text";
+
+          row.innerHTML = `
+            <input type="color" value="${layer.color}" aria-label="Цвет слоя ${index + 1}" />
+            <select aria-label="Режим слоя ${index + 1}">
+              ${MB_MODES.map((m) => `<option value="${m}"${m === layer.mode ? " selected" : ""}>${m}</option>`).join("")}
+            </select>
+            <button class="mb-kind" type="button" title="Переключить тип слоя">${isText ? "Aa" : "●"}</button>
+            <button class="stop-del" type="button" title="Удалить слой">×</button>
+            ${isText ? `
+              <div class="mb-extra">
+                <input class="mb-text-input" type="text" value="${layer.text || ""}" placeholder="текст" aria-label="Текст слоя ${index + 1}" />
+                <input class="mb-size-input" type="number" min="12" max="160" step="2" value="${layer.size || 48}" aria-label="Размер текста ${index + 1}" title="Размер, px" />
+              </div>` : ""}`;
+
+          const [color, mode] = row.querySelectorAll("input[type=color], select");
+          color.addEventListener("input", () => { layer.color = color.value; renderBlend(); });
+          mode.addEventListener("change", () => { layer.mode = mode.value; renderBlend(); });
+
+          row.querySelector(".mb-kind").addEventListener("click", () => {
+            if (layer.kind === "shape") {
+              layer.kind = "text";
+              layer.text = layer.text || "текст";
+              layer.size = layer.size || 48;
+            } else {
+              layer.kind = "shape";
+            }
+            mbRows(); mbShapes(); renderBlend();
+          });
+
+          if (isText) {
+            row.querySelector(".mb-text-input").addEventListener("input", (event) => {
+              layer.text = event.target.value || "текст";
+              renderBlend();
+            });
+            row.querySelector(".mb-size-input").addEventListener("input", (event) => {
+              layer.size = mbClamp(event.target.value, 12, 160, layer.size || 48);
+              renderBlend();
+            });
+          }
+
+          row.querySelector(".stop-del").addEventListener("click", () => {
+            if (mbLayers.length <= 1) return;
+            mbLayers.splice(index, 1);
+            mbRows(); mbShapes(); renderBlend();
+          });
+          return row;
+        }));
+      }
+
+      mbAll.innerHTML = `<option value="">— выберите режим —</option>` +
+        MB_MODES.map((m) => `<option value="${m}">${m}</option>`).join("");
+
+      mbAll.addEventListener("change", () => {
+        if (!mbAll.value) return;
+        mbLayers.forEach((layer) => { layer.mode = mbAll.value; });
+        mbRows(); mbShapes(); renderBlend();
+      });
+
+      mbBg.addEventListener("input", () => renderBlend());
+
+      mbImgUrl.addEventListener("input", () => {
+        const value = mbImgUrl.value.trim();
+        mbImage = value ? { preview: value, code: value } : { preview: "", code: "" };
+        renderBlend();
+      });
+
+      mbImgFile.addEventListener("change", () => {
+        const file = mbImgFile.files && mbImgFile.files[0];
+        if (!file) return;
+        mbImage = { preview: URL.createObjectURL(file), code: file.name };
+        renderBlend();
+      });
+
+      document.getElementById("mb-img-kind").addEventListener("change", (event) => {
+        const kind = event.target.value;
+        mbImage = kind ? { preview: sampleImage(kind), code: "" } : { preview: "", code: "" };
+        renderBlend();
+      });
+
+      const MB_PRESETS = {
+        duo: {
+          bg: "#0f172a",
+          layers: [
+            { kind: "shape", color: "#22d3ee", mode: "screen", x: 32, y: 40 },
+            { kind: "shape", color: "#f472b6", mode: "multiply", x: 68, y: 58 },
+          ],
+        },
+        neon: {
+          bg: "#05010f",
+          layers: [
+            { kind: "shape", color: "#7c3aed", mode: "overlay", x: 34, y: 34 },
+            { kind: "shape", color: "#22d3ee", mode: "screen", x: 70, y: 30 },
+            { kind: "text", color: "#a3ff12", mode: "screen", x: 50, y: 52, text: "NEON", size: 64 },
+          ],
+        },
+        retro: {
+          bg: "#f5e6c8",
+          layers: [
+            { kind: "shape", color: "#f59e0b", mode: "multiply", x: 70, y: 28 },
+            { kind: "text", color: "#7c2d12", mode: "multiply", x: 50, y: 50, text: "RETRO", size: 62 },
+          ],
+        },
+      };
+
+      document.querySelectorAll("[data-mb-preset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const preset = MB_PRESETS[btn.dataset.mbPreset];
+          if (!preset) return;
+          mbLayers = preset.layers.map((l) => ({ ...l }));
+          mbBg.value = preset.bg;
+          mbRows(); mbShapes(); renderBlend();
+        });
+      });
+
+      mbImgReset.addEventListener("click", () => {
+        mbImage = { preview: "", code: "" };
+        mbImgUrl.value = "";
+        mbImgFile.value = "";
+        document.getElementById("mb-img-kind").value = "";
+        renderBlend();
+      });
+
+      function renderBlend() {
+        const isolate = mbIsolate.value === "yes";
+        const opacity = Number(mbOp.value);
+        const bg = mbBg.value;
+        const hasImage = Boolean(mbImage.preview);
+        mbStage.style.isolation = isolate ? "isolate" : "auto";
+        mbBase.style.backgroundImage = hasImage
+          ? `url("${mbImage.preview}")`
+          : `linear-gradient(135deg, ${bg}, #1b1035 70%)`;
+        mbBase.style.backgroundSize = hasImage ? "cover" : "auto";
+        mbBase.style.backgroundPosition = hasImage ? "center" : "0 0";
+
+        [...mbStage.querySelectorAll(".mb-shape, .mb-text")].forEach((el) => {
+          const layer = mbLayers[Number(el.dataset.index)];
+          if (!layer) return;
+          el.style.left = layer.x + "%";
+          el.style.top = layer.y + "%";
+          el.style.color = layer.color;
+          el.style.mixBlendMode = layer.mode;
+          el.style.opacity = String(opacity);
+          if (layer.kind === "text") {
+            el.textContent = layer.text || "текст";
+            el.style.fontSize = (layer.size || 48) + "px";
+            el.style.background = "transparent";
+          } else {
+            el.style.background = layer.color;
+          }
+        });
+
+        const rules = mbLayers.map((layer, index) => {
+          const lines = [
+            `  ${layer.kind === "text" ? "color" : "background-color"}: ${layer.color};`,
+            `  mix-blend-mode: ${layer.mode};`,
+            `  left: ${layer.x}%;`,
+            `  top: ${layer.y}%;`,
+          ];
+          if (layer.kind === "text") lines.push(`  font-size: ${layer.size || 48}px;`);
+          return `.layer-${index + 1} {\n${lines.join("\n")}\n}`;
+        }).join("\n\n");
+
+        mbCode.textContent = `.parent {
+  isolation: ${isolate ? "isolate" : "auto"};
+  background-image: ${hasImage ? `url("${mbImage.code || "photo.jpg"}")` : `linear-gradient(135deg, ${bg}, #1b1035 70%)`};
+  background-size: ${hasImage ? "cover" : "auto"};
+}
+
+${rules}
+
+/* общее для слоёв */
+.layer { position: absolute; opacity: ${opacity}; transform: translate(-50%, -50%); }
+.layer-text { font-weight: 800; letter-spacing: 0.02em; }`;
+      }
+
+      mbIsolate.addEventListener("change", () => renderBlend());
+      mbOp.addEventListener("input", () => renderBlend());
+      document.getElementById("mb-add").addEventListener("click", () => {
+        const last = mbLayers[mbLayers.length - 1] || MB_DEFAULT[0];
+        mbLayers.push({ kind: "shape", color: last.color, mode: "normal", x: Math.round((last.x + 18) % 100), y: Math.round((last.y + 12) % 100) });
+        mbRows(); mbShapes(); renderBlend();
+      });
+      document.getElementById("mb-add-text").addEventListener("click", () => {
+        mbLayers.push({ kind: "text", color: "#ffffff", mode: "difference", x: 50, y: 50, text: "ТЕКСТ", size: 52 });
+        mbRows(); mbShapes(); renderBlend();
+      });
+      document.getElementById("mb-default").addEventListener("click", () => {
+        mbLayers = MB_DEFAULT.map((l) => ({ ...l }));
+        mbRows(); mbShapes(); renderBlend();
+      });
+
+      mbRows();
+      mbShapes();
+      renderBlend();
+
+      /* ---------- background-blend-mode ---------- */
+      const bbStage = document.getElementById("bb-stage");
+      const bbMode = document.getElementById("bb-mode");
+      const bbCount = document.getElementById("bb-count");
+      const bbStopsEl = document.getElementById("bb-stops");
+      const bbAdd = document.getElementById("bb-add");
+      const bbAlpha = document.getElementById("bb-alpha");
+      const bbImgUrl = document.getElementById("bb-img-url");
+      const bbImgFile = document.getElementById("bb-img-file");
+      const bbImgReset = document.getElementById("bb-img-reset");
+      const bbCode = document.getElementById("bb-code");
+
+      const BB_SAMPLE = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#1b1035"/><stop offset="0.5" stop-color="#4c1d95"/><stop offset="1" stop-color="#7c3aed"/>
+        </linearGradient></defs>
+        <rect width="800" height="520" fill="url(#g)"/>
+        <circle cx="180" cy="150" r="120" fill="#f472b6" opacity="0.9"/>
+        <circle cx="620" cy="180" r="150" fill="#38bdf8" opacity="0.85"/>
+        <circle cx="420" cy="420" r="180" fill="#fbbf24" opacity="0.8"/>
+      </svg>`);
+
+      let bbImage = { preview: BB_SAMPLE, code: "" };
+
+      let bbStops = [{ c: "#7c3aed" }, { c: "#f472b6" }, { c: "#fbbf24" }];
+
+      function bbBuildStops() {
+        bbStopsEl.replaceChildren(...bbStops.map((stop, index) => {
+          const row = document.createElement("div");
+          row.className = "stop-row";
+          row.innerHTML = `
+            <input type="color" value="${stop.c}" aria-label="Цвет ${index + 1}" />
+            <input type="text" value="${stop.c}" aria-label="HEX ${index + 1}" />
+            <button class="stop-del" type="button" title="Удалить цвет">×</button>`;
+          const [picker, text] = row.querySelectorAll("input");
+          const apply = (value) => {
+            stop.c = value; picker.value = value; text.value = value;
+            renderBackgroundBlend();
+          };
+          picker.addEventListener("input", () => apply(picker.value));
+          text.addEventListener("input", () => {
+            if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(text.value.trim())) apply(text.value.trim());
+          });
+          row.querySelector(".stop-del").addEventListener("click", () => {
+            if (bbStops.length <= 2) return;
+            bbStops.splice(index, 1);
+            bbBuildStops(); renderBackgroundBlend();
+          });
+          return row;
+        }));
+      }
+
+      function renderBackgroundBlend() {
+        const mode = bbMode.value;
+        const count = Number(bbCount.value);
+        const alpha = Number(bbAlpha.value);
+
+        const rgba = (hex, a) => {
+          let value = hex.replace("#", "");
+          if (value.length === 3) value = value.split("").map((ch) => ch + ch).join("");
+          const r = parseInt(value.slice(0, 2), 16);
+          const g = parseInt(value.slice(2, 4), 16);
+          const b = parseInt(value.slice(4, 6), 16);
+          return `rgba(${r}, ${g}, ${b}, ${a})`;
+        };
+
+        const colors = bbStops.map((stop) => rgba(stop.c, alpha));
+        const stops = count === 2
+          ? `linear-gradient(135deg, ${colors.join(", ")}, transparent 60%), linear-gradient(45deg, ${[...colors].reverse().join(", ")}, transparent 55%)`
+          : `linear-gradient(135deg, ${colors.join(", ")})`;
+
+        const imageLayer = `url("${bbImage.preview}")`;
+        bbStage.style.backgroundImage = `${stops}, ${imageLayer}`;
+        bbStage.style.backgroundSize = "cover";
+        bbStage.style.backgroundPosition = "center";
+        bbStage.style.backgroundBlendMode = mode;
+
+        bbCode.textContent = `.hero {
+  background-image: ${count === 2
+    ? `linear-gradient(135deg, ${colors.join(", ")}, transparent 60%), linear-gradient(45deg, ${[...colors].reverse().join(", ")}, transparent 55%), url("${bbImage.code || "photo.jpg"}")`
+    : `linear-gradient(135deg, ${colors.join(", ")}), url("${bbImage.code || "photo.jpg"}")`};
+  background-blend-mode: ${mode};
+  background-size: cover;
+  background-position: center;
+}`;
+      }
+
+      [bbMode, bbCount].forEach((el) => el.addEventListener("input", renderBackgroundBlend));
+      bbAlpha.addEventListener("input", renderBackgroundBlend);
+
+      bbImgUrl.addEventListener("input", () => {
+        const value = bbImgUrl.value.trim();
+        bbImage = value ? { preview: value, code: value } : { preview: BB_SAMPLE, code: "" };
+        renderBackgroundBlend();
+      });
+
+      bbImgFile.addEventListener("change", () => {
+        const file = bbImgFile.files && bbImgFile.files[0];
+        if (!file) return;
+        bbImage = { preview: URL.createObjectURL(file), code: file.name };
+        renderBackgroundBlend();
+      });
+
+      document.getElementById("bb-img-kind").addEventListener("change", (event) => {
+        const kind = event.target.value;
+        bbImage = { preview: kind === "sample" ? BB_SAMPLE : sampleImage(kind), code: "" };
+        renderBackgroundBlend();
+      });
+
+      const BB_PRESETS = {
+        duo: { mode: "multiply", colors: ["#2563eb", "#f472b6"], count: 1, alpha: 1 },
+        neon: { mode: "screen", colors: ["#22d3ee", "#a855f7", "#f472b6"], count: 2, alpha: 0.85 },
+        vintage: { mode: "soft-light", colors: ["#f59e0b", "#7c2d12"], count: 1, alpha: 1 },
+      };
+
+      document.querySelectorAll("[data-bb-preset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const preset = BB_PRESETS[btn.dataset.bbPreset];
+          if (!preset) return;
+          bbMode.value = preset.mode;
+          bbStops = preset.colors.map((c) => ({ c }));
+          bbBuildStops();
+          bbCount.value = String(preset.count);
+          bbAlpha.value = String(preset.alpha);
+          renderBackgroundBlend();
+        });
+      });
+
+      bbImgReset.addEventListener("click", () => {
+        bbImage = { preview: BB_SAMPLE, code: "" };
+        bbImgUrl.value = "";
+        bbImgFile.value = "";
+        document.getElementById("bb-img-kind").value = "sample";
+        renderBackgroundBlend();
+      });
+
+      bbAdd.addEventListener("click", () => {
+        bbStops.push({ c: bbStops[bbStops.length - 1].c });
+        bbBuildStops();
+        renderBackgroundBlend();
+      });
+
+      bbBuildStops();
+      renderBackgroundBlend();
+
+
+      /* ---------- text-stroke ---------- */
+      const tsText = document.getElementById("ts-text");
+      const tsWidth = document.getElementById("ts-width");
+      const tsWidthNum = document.getElementById("ts-width-num");
+      const tsSize = document.getElementById("ts-size");
+      const tsSizeNum = document.getElementById("ts-size-num");
+      const tsColorEl = document.getElementById("ts-color");
+      const tsFillEl = document.getElementById("ts-fill");
+      const tsModeEl = document.getElementById("ts-mode");
+      const tsWordEl = document.getElementById("ts-word");
+      const tsCodeEl = document.getElementById("ts-code");
+
+      [[tsWidth, tsWidthNum], [tsSize, tsSizeNum]].forEach(([range, num]) => {
+        range.addEventListener("input", () => { num.value = range.value; renderTextStroke(); });
+        num.addEventListener("input", () => {
+          const v = Number(num.value);
+          if (Number.isFinite(v)) range.value = String(v);
+          renderTextStroke();
+        });
+      });
+      [tsColorEl, tsFillEl, tsModeEl, tsWordEl].forEach((el) =>
+        el.addEventListener("input", renderTextStroke),
+      );
+
+      function tsShadow(w, color) {
+        const parts = [];
+        const len = Math.max(1, Math.round(w));
+        for (let i = 0; i < 8; i += 1) {
+          const a = (Math.PI * 2 * i) / 8;
+          parts.push(`${(Math.cos(a) * len).toFixed(1)}px ${(Math.sin(a) * len).toFixed(1)}px 0 ${color}`);
+        }
+        return parts.join(", ");
+      }
+
+      function renderTextStroke() {
+        if (!tsText) return;
+        const w = Number(tsWidthNum.value) || 0;
+        const size = Number(tsSizeNum.value) || 72;
+        const color = tsColorEl.value;
+        const fill = tsFillEl.value;
+        const mode = tsModeEl.value;
+
+        tsText.textContent = tsWordEl.value || "Обводка";
+        tsText.style.fontSize = size + "px";
+        tsText.style.color = fill;
+        tsText.style.webkitTextStroke = "0";
+        tsText.style.textShadow = "none";
+        tsText.style.paintOrder = "normal";
+
+        if (mode === "stroke") {
+          tsText.style.webkitTextStroke = `${w}px ${color}`;
+          tsCodeEl.textContent = `.title {
+  -webkit-text-stroke: ${w}px ${color};
+  color: ${fill};
+  font-size: ${size}px;
+}`;
+        } else if (mode === "shadow") {
+          const shadow = tsShadow(w, color);
+          tsText.style.textShadow = shadow;
+          tsCodeEl.textContent = `.title {
+  color: ${fill};
+  text-shadow:
+    ${shadow.split(", ").join(",\n    ")};
+  font-size: ${size}px;
+}`;
+        } else {
+          tsText.style.webkitTextStroke = `${w}px ${color}`;
+          tsText.style.paintOrder = "stroke fill";
+          tsCodeEl.textContent = `/* только для SVG-текста */
+<text paint-order="stroke fill"
+      stroke="${color}" stroke-width="${Math.round(w * 2)}"
+      fill="${fill}" font-size="${size}">
+  ${tsWordEl.value || "Обводка"}
+</text>`;
+        }
+      }
+
+      renderTextStroke();
+
+      renderAngles();
+      renderTranslate();
+      renderTransform();
+      renderTransition();
+      cvDraw();
+      renderKf();
+      run();
+      render3d();
+
+
+      /* ---------- вкладки ---------- */
+      const cards = [...document.querySelectorAll("main .card")];
+      const tabsNav = document.getElementById("tabs");
+      const scroller = window;
+
+      const TAB_GROUPS = [
+        ["Значения", ["Углы в CSS", "RGB", "HEX", "HSL"]],
+        ["Движение", ["translate", "transform", "transition", "Кривая (cubic-bezier)", "Анимация", "@keyframes: многошаговый", "Анимация цвета", "3D-трансформации"]],
+        ["Оформление", ["box-shadow: слои", "text-shadow: слои", "filter", "backdrop-filter", "clip-path", "text-stroke", "mix-blend-mode", "background-blend-mode"]],
+        ["Градиенты", ["linear-gradient", "radial-gradient", "conic-gradient"]],
+      ];
+
+      const titleToIndex = new Map(cards.map((card, i) => [card.querySelector("h1").textContent.trim(), i]));
+      const used = new Set();
+
+      TAB_GROUPS.forEach(([groupName, titles]) => {
+        const group = document.createElement("div");
+        group.className = "tab-group";
+
+        const label = document.createElement("span");
+        label.className = "tab-group__label";
+        label.textContent = groupName;
+
+        const row = document.createElement("div");
+        row.className = "tab-row";
+
+        titles.forEach((title) => {
+          const i = titleToIndex.get(title);
+          if (i === undefined) return;
+          used.add(i);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "tab";
+          btn.dataset.i = String(i);
+          btn.textContent = title;
+          btn.setAttribute("role", "tab");
+          row.append(btn);
+        });
+
+        group.append(label, row);
+        tabsNav.append(group);
+      });
+
+      function showPanel(i, pushHash) {
+        cards.forEach((card, k) => card.classList.toggle("is-active", k === i));
+        const buttons = [...tabsNav.querySelectorAll(".tab")];
+        buttons.forEach((btn) => btn.setAttribute("aria-selected", Number(btn.dataset.i) === i ? "true" : "false"));
+        if (pushHash) history.replaceState(null, "", "#" + (i + 1));
+        window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+        const active = buttons.find((btn) => Number(btn.dataset.i) === i);
+        if (active) active.scrollIntoView({ inline: "center", block: "nearest" });
+      }
+
+      tabsNav.addEventListener("click", (e) => {
+        const btn = e.target.closest(".tab");
+        if (btn) showPanel(Number(btn.dataset.i), true);
+      });
+
+      window.addEventListener("hashchange", () => {
+        const i = Math.max(0, Math.min(cards.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+        showPanel(i, false);
+      });
+
+      showPanel(Math.max(0, Math.min(cards.length - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1)), false);
+
+      /* ---------- очистить значение ---------- */
+      const resetBtn = document.getElementById("reset-tab");
+      const allCards = [...document.querySelectorAll("main .card")];
+
+      const DEFAULTS = allCards.map((card) =>
+        [...card.querySelectorAll("input, select, textarea")].map((el) => ({
+          el,
+          value: el.value,
+          checked: el.checked,
+        })),
+      );
+
+      resetBtn.addEventListener("click", () => {
+        const index = allCards.findIndex((card) => card.classList.contains("is-active"));
+        if (index < 0) return;
+
+        DEFAULTS[index].forEach(({ el, value, checked }) => {
+          el.value = value;
+          el.checked = checked;
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+          el.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+
+        const localReset = [...allCards[index].querySelectorAll("button")].find(
+          (btn) => /^сброс$/i.test(btn.textContent.trim()),
+        );
+        if (localReset) localReset.click();
+
+        const gradReset = allCards[index].querySelector("[data-grad-reset]");
+        if (gradReset) gradReset.click();
+
+        if (allCards[index].querySelector("#rg-stage")) {
+          radialCenter.x = 50;
+          radialCenter.y = 50;
+          renderRadial();
+        }
+        if (allCards[index].querySelector("#cg-stage")) {
+          conicCenter.x = 50;
+          conicCenter.y = 50;
+          renderConic();
+        }
+
+        window.scrollTo({ top: 0 });
+      });
+
+      /* ---------- кнопки «копировать» ---------- */
+      function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
+        }
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        return Promise.resolve();
+      }
+
+      document.querySelectorAll("pre.out").forEach((pre) => {
+        const wrap = document.createElement("div");
+        wrap.className = "out-wrap";
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "copy";
+        btn.textContent = "копировать";
+        btn.addEventListener("click", async () => {
+          try {
+            await copyText(pre.textContent);
+          } catch (err) {
+            /* ничего: просто не показываем «скопировано» */
+          }
+          btn.textContent = "скопировано";
+          btn.classList.add("is-done");
+          setTimeout(() => {
+            btn.textContent = "копировать";
+            btn.classList.remove("is-done");
+          }, 1200);
+        });
+        wrap.appendChild(btn);
+      });
+    </script>
+  </body>
+</html>
