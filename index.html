@@ -953,9 +953,9 @@
         const wrap = document.createElement('div');
         wrap.className = 'ctrl';
         wrap.innerHTML = `<label class="ctrl__label">${label}</label>
-          <div style="display:flex;gap:8px;align-items:center;margin-block-start:6px">
-            <input type="file" accept="image/*" class="x-add" style="max-inline-size:100%" />
-            <button type="button" class="x-add x-clear">убрать</button>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-block-start:6px">
+            <input type="file" accept="image/*" class="x-add" style="flex:1 1 150px;min-inline-size:0;max-inline-size:100%" />
+            <button type="button" class="x-add x-clear" style="flex:0 0 auto">убрать</button>
           </div>`;
         const input = wrap.querySelector('input[type="file"]');
         const clear = wrap.querySelector('.x-clear');
