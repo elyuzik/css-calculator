@@ -1267,7 +1267,7 @@
           render(v) {
             const val = `${v.inset ? 'inset ' : ''}${v.x}px ${v.y}px ${v.blur}px ${v.spread}px ${hexToRgba(v.color, v.alpha)}`;
             return {
-              html: `<div class="demo-box demo-box--light" style="box-shadow:${val}">Shadow</div>`,
+              html: `<div style="padding:44px 40px;border-radius:18px;background:#e9e5ff"><div class="demo-box" style="background:#ffffff;color:#1b1035;box-shadow:${val}">Shadow</div></div>`,
               css: `box-shadow: ${val};`
             };
           }
@@ -1299,7 +1299,8 @@
             }
             const val = arr.join(',\n  ');
             return {
-              html: `<div class="demo-box demo-box--light" style="box-shadow:${arr.join(', ')}">Smooth</div>`,
+              html: `<div style="padding:44px 40px;border-radius:18px;background:#e9e5ff"><div class="demo-box" style="background:#ffffff;color:#1b1035;box-shadow:${arr.join(', ')}">Smooth</div></div>
+                <p class="demo-caption">${v.layers} слоёв · глубина ${v.dist}px · сила ${v.alpha}</p>`,
               css: `box-shadow:\n  ${val};`
             };
           }
@@ -1787,10 +1788,40 @@
           controls: [
             { k: 'hex', label: 'HEX-код', type: 'text', def: '#7c3aed' }
           ],
+          customUI(container, vals, refresh) {
+            const wrap = document.createElement('div');
+            wrap.className = 'ctrl';
+            wrap.innerHTML = `<label class="ctrl__label">Палитра</label>
+              <div style="display:flex;gap:10px;align-items:center;margin-block-start:6px">
+                <input type="color" value="${/^#([0-9a-f]{6})$/i.test(vals.hex) ? vals.hex : '#7c3aed'}" style="inline-size:52px;block-size:38px;padding:0;border:1px solid var(--line-strong);border-radius:10px;background:transparent" />
+                <span class="ctrl__hex">${vals.hex}</span>
+              </div>`;
+            const picker = wrap.querySelector('input[type="color"]');
+            const label = wrap.querySelector('.ctrl__hex');
+            picker.addEventListener('input', () => {
+              vals.hex = picker.value;
+              label.textContent = picker.value;
+              const text = container.querySelector('input.ctrl__text');
+              if (text) text.value = picker.value;
+              refresh();
+            });
+            const text = container.querySelector('input.ctrl__text');
+            if (text) {
+              text.addEventListener('input', () => {
+                if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(text.value)) {
+                  picker.value = text.value.length === 4
+                    ? '#' + text.value.slice(1).split('').map((c) => c + c).join('')
+                    : text.value;
+                  label.textContent = text.value;
+                }
+              });
+            }
+            container.appendChild(wrap);
+          },
           presets: [
-            { name: '#7c3aed', v: { hex: '#7c3aed' } },
-            { name: '#22d3ee', v: { hex: '#22d3ee' } },
-            { name: '#f472b6', v: { hex: '#f472b6' } }
+            { name: 'Фиолетовый', v: { hex: '#7c3aed' } },
+            { name: 'Циан', v: { hex: '#22d3ee' } },
+            { name: 'Розовый', v: { hex: '#f472b6' } }
           ],
           render(v) {
             const raw = String(v.hex || '').trim();
